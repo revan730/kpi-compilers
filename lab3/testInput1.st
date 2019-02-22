@@ -1,8 +1,3 @@
-user Revan730 {
-    hookSecret = "secret";
-    accessToken = "token";
-}
-
 complex myType {
     string a;
     integer b;
@@ -12,6 +7,11 @@ command myFunc(void) {
     var integer a;
     var boolean b;
     var complex myType c;
+    var user Revan730;
+    Revan730 = {
+        hookSecret = "secret";
+        accessToken = "token";
+    }
     a = 10;
     a++;
     a--;

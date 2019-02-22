@@ -28,8 +28,6 @@ export class FSM {
                 return true
             });
 
-        console.log('returning from fsm');
-        console.log('from fsm', input.slice(0, length + 1));
         return {
             recognized: this.acceptingStates.has(currentState),
             value: input.slice(0, length + 1),

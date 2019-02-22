@@ -127,5 +127,10 @@ export function isBooleanLiteral(identifier: string): boolean {
     return identifier === 'true' || identifier === 'false';
 }
 
-console.log(isLogicalOperator('|'));
-console.log(isOperator('|'));
+export function returnBooleanValue(stringBoolean: string): boolean {
+    if (stringBoolean === 'true') {
+        return true;
+    } else {
+        return false;
+    }
+}

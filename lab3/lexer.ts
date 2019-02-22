@@ -149,7 +149,6 @@ export class Lexer {
         let character = this.input.charAt(this.position);
         
         if (CharUtils.isComparisonOperator(character)) {
-            console.log('comp op: ', character);
             return this.recognizeComparisonOperator();
         }
         
