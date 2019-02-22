@@ -39,6 +39,8 @@ const reserved = [
     TokenTypes.Var,
     TokenTypes.Complex,
     TokenTypes.Return,
+    TokenTypes.Command,
+    TokenTypes.Func,
 ]
 
 const postfixOperators = [

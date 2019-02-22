@@ -3,6 +3,10 @@ complex myType {
     integer b;
 }
 
+func boolean myBoolFunc(void) {
+    return false;
+}
+
 command myFunc(void) {
     var integer a;
     var boolean b;

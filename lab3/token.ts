@@ -41,6 +41,7 @@ export namespace TokenTypes {
     export const Void = 'void';
     export const Var = 'var';
     export const Command = 'command';
+    export const Func = 'func';
     export const Complex = 'complex';
     export const Return = 'return';
 

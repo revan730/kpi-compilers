@@ -29,6 +29,9 @@ import { Statement } from './statement';
 import { BlockStatement } from './block';
 import { ComplexField } from './complexField';
 import { ComplexType } from './complexType';
+import { FunctionParameter } from './functionParameter';
+import { Func } from './func';
+import { ReturnStatement } from './returnStatement';
 
 export class Parser {
     private binopLevels: any;
@@ -38,6 +41,7 @@ export class Parser {
     private conditions: any;
     private statements: any;
     private complexTypes: any;
+    private functions: any;
     private lexer: Lexer;
     private tokens: Token[];
     private errorToken: Token;
@@ -69,6 +73,7 @@ export class Parser {
         this.assigns = [];
         this.conditions = [];
         this.complexTypes = [];
+        this.functions = [];
         this.tokens = this.lexer.allTokens();
         this.currentToken = 0;
         this.token = this.tokens[this.currentToken];
@@ -237,15 +242,18 @@ export class Parser {
             TokenTypes.Lparent,
             TokenTypes.Lbrace,
             TokenTypes.Identifier,
-            TokenTypes.Complex
+            TokenTypes.Complex,
+            TokenTypes.Func,
+            TokenTypes.Command,
         ]);
 		const statementList = [];
 		while (this.isStatement())
-			statementList.push(this.parseStatement());
+            statementList.push(this.parseStatement());
 		return statementList;
     }
 
     private isStatement(): boolean {
+        console.log('t ', this.token.getType(), this.token.getType().length);
 		switch(this.token.getType()){
         case TokenTypes.Semi:
             return  true
@@ -260,6 +268,11 @@ export class Parser {
         case TokenTypes.Identifier:
             return  true;
         case TokenTypes.Complex:
+            return true;
+        case TokenTypes.Command:
+            return true;
+        case TokenTypes.Func:
+            console.log('why da fuck not here');
             return true;
         default:
 			return false;
@@ -281,23 +294,53 @@ export class Parser {
     }
 
     // type identifier
-    private parseComplexField() {
+    private parseComplexField(): ComplexField {
         const type = this.parseType();
         const id = this.parseIdentifier();
         this.eatToken(TokenTypes.Semi);
         return new ComplexField(type, id);
     }
 
-    private parseComplexFields() {
+    // type identifier
+    private parseFuncParameter(): FunctionParameter {
+        const type = this.parseType();
+        const id = this.parseIdentifier();
+        return new FunctionParameter(type, id);
+    }
+
+    private parseComplexFields(): ComplexField[] {
         this.eatToken(TokenTypes.Lbrace);
 
         const fields = [];
         while (this.token.getType() != TokenTypes.Rbrace && this.token.getType() != TokenTypes.EOF)
             fields.push(this.parseComplexField());
-            console.log(fields);
         
         this.eatToken(TokenTypes.Rbrace);
         return fields;
+    }
+
+    // “void” | type identifier {‘,’ type identifier}
+    private parseFuncParameters(): FunctionParameter[] {
+        this.eatToken(TokenTypes.Lparent);
+
+        if (this.token.getType() === TokenTypes.Void) {
+            // No params, skipping 'void)'
+            this.eatToken(TokenTypes.Void);
+            this.eatToken(TokenTypes.Rparent);
+            return [];
+        }
+
+        // Parse first parameter
+        const param = this.parseFuncParameter();
+        const params = [param];
+
+        while (this.token.getType() === TokenTypes.Comma) {
+            this.eatToken(TokenTypes.Comma);
+            params.push(this.parseFuncParameter());
+        }
+
+        this.eatToken(TokenTypes.Rparent);
+        return params;
     }
 
     private parseStatement(): Statement {
@@ -369,7 +412,36 @@ export class Parser {
 
         }
 
-        // TODO: function definitions
+        console.log('token type here', this.token.getType());
+        if (this.token.getType() === TokenTypes.Command || this.token.getType() === TokenTypes.Func) {
+            const isFunc = this.token.getType() === TokenTypes.Func;
+            this.eatToken(this.token.getType());
+            let type = null;
+            if (isFunc) {
+                // Parse return type
+                type = this.parseType();
+            }
+            const funcName = this.parseIdentifier();
+            // Parameter types list
+            const params = this.parseFuncParameters();
+            const funcBody = this.parseBlock();
+
+            const func = new Func(funcName, params, funcBody, type);
+            this.functions.push(func);
+            return func;
+        }
+
+        // TODO: Parse return statement
+        if (this.token.getType() === TokenTypes.Return) {
+            this.eatToken(TokenTypes.Return);
+
+            const value = this.parseExp();
+				
+			this.eatToken(TokenTypes.Semi);
+
+			const ret = new ReturnStatement(value);
+			return ret;
+        }
         
         // Complex type specification statement
         if (this.token.getType() === TokenTypes.Complex) {
@@ -380,8 +452,10 @@ export class Parser {
             const typeFields = this.parseComplexFields();
             const complexType = new ComplexType(id, typeFields);
             this.complexTypes.push(complexType);
+            return complexType;
         }
-		// statement type unknown
+        console.log('token type here', this.token.getType());
+        // statement type unknown
 		this.eatToken(TokenTypes.Unknown);
 		this.nextToken();
 		return null;
@@ -393,8 +467,8 @@ export class Parser {
     }
 
     private parsePrimaryExp(): Expression {
+        console.log('fuck this ', this.token.getType());
 		switch (this.token.getType()) {
-
 		case TokenTypes.IntegerLiteral:
 			const intValue = Number(this.token.getValue());
 			this.eatToken(TokenTypes.IntegerLiteral);
@@ -446,22 +520,24 @@ export class Parser {
 		// continuously parse exp until a lower order operator comes up
 		while (true) {
 			// grab operator precedence (-1 for non-operator token)
-			let val = this.binopLevels[this.token.getType()];
-			const tokenLevel = (val !== null) ? val : -1;
+            let val = this.binopLevels[this.token.getType()];
+            console.log('fucking val', val);
+			const tokenLevel = (val !== undefined) ? val : -1;
 
 			// either op precedence is lower than prev op or token is not an op
 			if (tokenLevel < level)
 				return lhs;
 
 			// save binop before parsing rhs of exp
-			const binop = this.token.getType();
+            const binop = this.token.getType();
+            console.log('this is not a fucking binop ', binop);
 			this.eatToken(binop);
 
 			let rhs = this.parsePrimaryExp(); // parse rhs of exp
 
 			// grab operator precedence (-1 for non-operator token)
 			val = this.binopLevels[this.token.getType()];
-			const nextLevel = (val !== null) ? val : -1;
+			const nextLevel = (val !== undefined) ? val : -1;
 
 			// if next op has higher precedence than prev op, make recursive call
 			if (tokenLevel < nextLevel)

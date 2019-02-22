@@ -1,8 +1,10 @@
+import { ComplexField } from "./complexField";
+
 export class ComplexType {
     private id: string;
-    private fields: ComplexType[];
+    private fields: ComplexField[];
 
-    constructor(id: string, fields: ComplexType[]) {
+    constructor(id: string, fields: ComplexField[]) {
         this.id = id;
         this.fields = fields;
     }
@@ -11,7 +13,7 @@ export class ComplexType {
         return this.id;
     }
 
-    public getFields(): ComplexType[] {
+    public getFields(): ComplexField[] {
         return this.fields;
     }
 }
