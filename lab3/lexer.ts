@@ -37,6 +37,8 @@ export class Lexer {
             token = this.nextToken();
         }
 
+        tokens.push(token);
+
         return tokens;
     }
 

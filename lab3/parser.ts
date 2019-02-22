@@ -13,6 +13,7 @@ export class Parser {
     private tokens: Token[];
     private errorToken: Token;
     private currentToken: number;
+    private token: Token;
     private errors: number;
 
     private initBinopLevels() {
@@ -40,6 +41,7 @@ export class Parser {
         this.conditions = [];
         this.tokens = this.lexer.allTokens();
         this.currentToken = 0;
+        this.token = this.tokens[this.currentToken];
         this.errors = 0;
     }
 
@@ -56,32 +58,32 @@ export class Parser {
 	}
 
     private eatToken(expectedType: string): boolean {
-        const actualType = this.tokens[this.currentToken].getType();
+        const actualType = this.token.getType();
         if (expectedType === actualType) {
-            this.currentToken += 1;
+            this.nextToken();
             return true;
         } else {
             this.error(expectedType);
         }
     }
 
+    private nextToken() {
+        this.currentToken += 1;
+        this.token = this.tokens[this.currentToken];
+    }
+
     private skipTo(follow: string[]) {
-        let token = this.tokens[this.currentToken];
-		while (token.getType() != TokenTypes.EOF) {
+		while (this.token.getType() != TokenTypes.EOF) {
 			for (let skip of follow) {
-				if (token.getType() == skip)
+				if (this.token.getType() == skip)
 					return;
             }
-            if (this.currentToken === this.tokens.length - 1) {
-                return false; // End of file
-            }
-            this.currentToken += 1;
-			token = this.tokens[this.currentToken];
+            this.nextToken();
 		}
     }
 
     public parseProgram() {		
-		this.declarations = this.parseDeclarations();
+        this.declarations = this.parseDeclarations();
         //this.statements = this.parseStatementList();
         // TODO: To be continued
 		this.eatToken(TokenTypes.EOF);
@@ -89,35 +91,20 @@ export class Parser {
 
     private parseDeclarations(): any[] {
         const declarations = [];
-        const token = this.tokens[this.currentToken];
 
-        // Remember current position
-        const currentPos = this.currentToken;
+        this.skipTo([TokenTypes.Var]);
 
-		while(token.getType() != TokenTypes.EOF)
-			declarations.push(...this.parseVarDecList());
+		while(this.token.getType() != TokenTypes.EOF) {
+            const varDecl = this.parseVarDecl();
+		    declarations.push(varDecl);
+            this.declarations.push(varDecl);
+            this.eatToken(TokenTypes.Semi);
+            this.skipTo([TokenTypes.Var]);
+        }
 
 		return declarations;
     }
     
-    // var_decl ::= “var” type identifier ‘;’
-    private parseVarDecList(): any[] {
-        const token = this.tokens[this.currentToken];
-        const varDeclList = [];
-
-        const found = this.skipTo([TokenTypes.Var]);
-        if (!found) {
-            return [];
-        }
-        const varDecl = this.parseVarDecl();
-        console.log(varDecl);
-		varDeclList.push(varDecl);
-        this.declarations.push(varDecl);
-        
-		this.eatToken(TokenTypes.Semi);
-
-		return varDeclList;
-    }
     
     private parseVarDecl(): VarDeclaration {
         this.eatToken(TokenTypes.Var);
