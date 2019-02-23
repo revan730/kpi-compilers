@@ -3,9 +3,9 @@ import { Expression } from "./expression";
 
 export class WhileStatement implements Statement {
     private condExp: Expression;
-    private loopStm: Statement;
+    private loopStm: Statement[];
 
-    constructor(condExp: Expression,  loopStm: Statement) {
+    constructor(condExp: Expression,  loopStm: Statement[]) {
         this.condExp = condExp;
         this.loopStm = loopStm;
     }
@@ -14,7 +14,7 @@ export class WhileStatement implements Statement {
 		return this.condExp;
 	}
 	
-	public getLoopStm(): Statement {
+	public getLoopStm(): Statement[] {
 		return this.loopStm;
 	}
 }

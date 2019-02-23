@@ -38,6 +38,7 @@ import { PostDecrementStatement } from './postDecrement';
 import { FieldAccessExpression } from './fieldAccessExpression';
 import { AccessAssignStatement } from './accessAssignStatement';
 import { WhileStatement } from './whileStatement';
+import { FuncCallStatement } from './funcCallStatement';
 
 export class Parser {
     private binopLevels: any;
@@ -101,7 +102,6 @@ export class Parser {
 	}
 
     private eatToken(expectedType: string): boolean {
-        console.log('expected ', expectedType);
         const actualType = this.token.getType();
         if (expectedType === actualType) {
             this.nextToken();
@@ -133,13 +133,10 @@ export class Parser {
     }
 
     public parseProgram() {		
-        //this.declarations = this.parseDeclarations();
-        //this.rewind();
         this.statements = this.parseStatementList();
-        // TODO: To be continued
-        console.dir(this.statements);
-		this.eatToken(TokenTypes.EOF);
-	}
+        this.eatToken(TokenTypes.EOF);
+        return this.statements;
+    }
     
     // integer | rune | string | boolean | complexUserOrReserved
     // reservedComplexType ::= user | repo | ciConfig | deployment | manifest
@@ -272,8 +269,11 @@ export class Parser {
 		while (this.token.getType() != TokenTypes.Rbrace && this.token.getType() != TokenTypes.EOF)
 			stms.push(this.parseStatement());
 
-		if (!this.eatToken(TokenTypes.Rbrace)) 
-			this.skipTo([TokenTypes.Rbrace, TokenTypes.Semi]);
+		if (!this.eatToken(TokenTypes.Rbrace)) {
+            this.skipTo([TokenTypes.Rbrace]);
+            this.eatToken(TokenTypes.Rbrace);
+        }
+            
 
 		return new BlockStatement(stms);
     }
@@ -322,6 +322,29 @@ export class Parser {
         while (this.token.getType() === TokenTypes.Comma) {
             this.eatToken(TokenTypes.Comma);
             params.push(this.parseFuncParameter());
+        }
+
+        this.eatToken(TokenTypes.Rparent);
+        return params;
+    }
+
+    // expression {‘,’ expression}
+    private parseFuncCallParameters(): Expression[] {
+        this.eatToken(TokenTypes.Lparent);
+
+        if (this.token.getType() === TokenTypes.Rparent) {
+            // No params, skipping ')'
+            this.eatToken(TokenTypes.Rparent);
+            return [];
+        }
+
+        // Parse first parameter
+        const param = this.parseExp();
+        const params = [param];
+
+        while (this.token.getType() === TokenTypes.Comma) {
+            this.eatToken(TokenTypes.Comma);
+            params.push(this.parseExp());
         }
 
         this.eatToken(TokenTypes.Rparent);
@@ -383,7 +406,7 @@ export class Parser {
 			return new IfStatement(condExp, trueStm, null);
         }
 
-        // while ::= while '('Exp')' Statement
+        // while ::= while '('Exp')' '{' statement {statement} '}'
 		if (this.token.getType() == TokenTypes.While) {
 			this.eatToken(TokenTypes.While);
 
@@ -398,18 +421,15 @@ export class Parser {
 			if (!this.eatToken(TokenTypes.Rparent))
 				this.skipTo([TokenTypes.Lbrace, TokenTypes.Semi, TokenTypes.Rbrace]);
 
-			let loopStm: BlockStatement | Statement;
+            let loopStm: Statement[];
+            
+            this.eatToken(TokenTypes.Lbrace);
 
-			// BLock ::= '{' StatementList '}' 
-			if (this.token.getType() == TokenTypes.Lbrace)
-				loopStm = this.parseBlock();
-
-			else
-				// parse looping statement
-				loopStm = this.parseStatement();
+            loopStm = this.parseStatementList();
+            this.eatToken(TokenTypes.Rbrace);
 
 			return new WhileStatement(condExp, loopStm);
-}
+        }
         
         if (this.token.getType() === TokenTypes.Var) {
             this.eatToken(TokenTypes.Var);
@@ -436,6 +456,8 @@ export class Parser {
                     const values = [];
                     while (this.token.getType() != TokenTypes.Rbrace && this.token.getType() != TokenTypes.EOF)
                         values.push(this.parseFieldAssignment());
+
+                    this.eatToken(TokenTypes.Rbrace);
                     
                     return new ComplexAssignStatement(id, values);
                 }
@@ -469,6 +491,14 @@ export class Parser {
                 this.eatToken(TokenTypes.Semi);
 
                 return new AccessAssignStatement(id.getValue(), field, value);
+            }
+
+            // func call
+            if (this.token.getType() === TokenTypes.Lparent) {
+                const params = this.parseFuncCallParameters();
+                
+                this.eatToken(TokenTypes.Semi);
+                return new FuncCallStatement(id, params);
             }
         }
 
@@ -518,7 +548,6 @@ export class Parser {
             return complexType;
         }
         // statement type unknown
-        console.log('why is it unknown if its ', this.token.getType());
 		this.eatToken(TokenTypes.Unknown);
 		this.nextToken();
 		return null;
