@@ -32,6 +32,9 @@ import { ComplexType } from './complexType';
 import { FunctionParameter } from './functionParameter';
 import { Func } from './func';
 import { ReturnStatement } from './returnStatement';
+import { FieldAssignment, ComplexAssignStatement } from './ComplexAssignStatement';
+import { PostIncrementStatement } from './postIncrement';
+import { PostDecrementStatement } from './postDecrement';
 
 export class Parser {
     private binopLevels: any;
@@ -125,37 +128,13 @@ export class Parser {
     }
 
     public parseProgram() {		
-        this.declarations = this.parseDeclarations();
-        this.rewind();
+        //this.declarations = this.parseDeclarations();
+        //this.rewind();
         this.statements = this.parseStatementList();
         // TODO: To be continued
         console.dir(this.statements);
 		this.eatToken(TokenTypes.EOF);
 	}
-
-    private parseDeclarations(): any[] {
-        const declarations = [];
-
-        this.skipTo([TokenTypes.Var]);
-
-		while(this.token.getType() != TokenTypes.EOF) {
-            const varDecl = this.parseVarDecl();
-		    declarations.push(varDecl);
-            this.declarations.push(varDecl);
-            this.eatToken(TokenTypes.Semi);
-            this.skipTo([TokenTypes.Var]);
-        }
-
-		return declarations;
-    }
-    
-    
-    private parseVarDecl(): VarDeclaration {
-        this.eatToken(TokenTypes.Var);
-		const type = this.parseType();
-		const id = this.parseIdentifier();
-		return new VarDeclaration(type, id);
-    }
     
     // integer | rune | string | boolean | complexUserOrReserved
     // reservedComplexType ::= user | repo | ciConfig | deployment | manifest
@@ -245,6 +224,7 @@ export class Parser {
             TokenTypes.Complex,
             TokenTypes.Func,
             TokenTypes.Command,
+            TokenTypes.Var,
         ]);
 		const statementList = [];
 		while (this.isStatement())
@@ -273,6 +253,8 @@ export class Parser {
             return true;
         case TokenTypes.Func:
             console.log('why da fuck not here');
+            return true;
+        case TokenTypes.Var:
             return true;
         default:
 			return false;
@@ -343,6 +325,14 @@ export class Parser {
         return params;
     }
 
+    private parseFieldAssignment(): FieldAssignment {
+        const id = this.parseIdentifier();
+        this.eatToken(TokenTypes.Assign);
+        const value = this.parseExp();
+        this.eatToken(TokenTypes.Semi);
+		return { field: id, assignment: value };
+    }
+
     private parseStatement(): Statement {
 
 		// IfStatement ::=  if '('Exp')' Statement [else Statement]
@@ -388,8 +378,15 @@ export class Parser {
 				return new IfStatement(condExp, trueStm, falseStm);
 			}
 			return new IfStatement(condExp, trueStm, null);
-		}
-
+        }
+        
+        if (this.token.getType() === TokenTypes.Var) {
+            this.eatToken(TokenTypes.Var);
+		    const type = this.parseType();
+            const id = this.parseIdentifier();
+            this.eatToken(TokenTypes.Semi);
+		    return new VarDeclaration(type, id);
+        }
 
 		// Identifier statement
 		if (this.token.getType() == TokenTypes.Identifier) {
@@ -400,15 +397,39 @@ export class Parser {
 
 			// Assignment statement: id = Exp ;
 			if (this.token.getType() == TokenTypes.Assign) {
-				this.eatToken(TokenTypes.Assign);
+                this.eatToken(TokenTypes.Assign);
+                
+                // complex type assignment
+                if (this.token.getType() === TokenTypes.Lbrace) {
+                    this.eatToken(TokenTypes.Lbrace);
+                    const values = [];
+                    while (this.token.getType() != TokenTypes.Rbrace && this.token.getType() != TokenTypes.EOF)
+                        values.push(this.parseFieldAssignment());
+                    
+                    return new ComplexAssignStatement(id, values);
+                }
 				const value = this.parseExp();
 				
 				this.eatToken(TokenTypes.Semi);
 
 				const assign = new AssignStatement(id, value);
-				this.assigns.add(assign);
+				this.assigns.push(assign);
 				return assign;
-			}
+            }
+            
+            
+            if (this.token.getType() === TokenTypes.PostIncrement || this.token.getType() === TokenTypes.PostDecrement) {
+                if (this.token.getType() === TokenTypes.PostDecrement) {
+                    this.eatToken(TokenTypes.PostDecrement);
+                    this.eatToken(TokenTypes.Semi);
+                    return new PostDecrementStatement(id);
+                }
+                this.eatToken(TokenTypes.PostIncrement);
+                this.eatToken(TokenTypes.Semi);
+                return new PostIncrementStatement(id);
+            }
+
+            // TODO: complex type field access
 
         }
 
@@ -431,7 +452,6 @@ export class Parser {
             return func;
         }
 
-        // TODO: Parse return statement
         if (this.token.getType() === TokenTypes.Return) {
             this.eatToken(TokenTypes.Return);
 
