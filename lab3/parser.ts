@@ -58,7 +58,6 @@ export class Parser {
 
     private initBinopLevels() {
         this.binopLevels = {};
-        this.binopLevels[TokenTypes.Dot] = 5;
         this.binopLevels[TokenTypes.And] = 10;
         this.binopLevels[TokenTypes.Or] = 10;
         this.binopLevels[TokenTypes.Lt] = 20;
@@ -71,6 +70,7 @@ export class Parser {
         this.binopLevels[TokenTypes.Minus] = 30;
         this.binopLevels[TokenTypes.Times] = 40;
         this.binopLevels[TokenTypes.Div] = 40;
+        this.binopLevels[TokenTypes.Dot] = 45;
         this.binopLevels[TokenTypes.Lbrace] = 50;
     }
     constructor(input: string) {
@@ -582,7 +582,8 @@ export class Parser {
 
 		case TokenTypes.Identifier:
 			const id = this.parseIdentifier();
-			this.identifiers.push(id);
+            this.identifiers.push(id);
+            // TODO: Check if it's a func call so func calls can be expressions
 			return new IdentifierExpression(id);
 
 		case TokenTypes.Not:

@@ -22,7 +22,7 @@ command myFunc(void) {
     b = true;
     c.a = "wow";
     c.b = 228;
-    if (a != b || a >= b || a == b && a < b) {
+    if (a != b || c.b >= b || a == b && a < b) {
         return;
     } else {
         b = !b;
