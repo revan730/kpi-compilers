@@ -10,6 +10,8 @@ func boolean myBoolFunc(void) {
 command myFunc(void) {
     var integer a;
     var boolean b;
+    var rune r;
+    r = 'a';
     var complex myType c;
     var user Revan730;
     Revan730 = {

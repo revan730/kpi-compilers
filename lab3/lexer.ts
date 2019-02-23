@@ -61,7 +61,11 @@ export class Lexer {
 
         if (character === '"') {
             return this.recognizeString();
-        }      
+        }
+        
+        if (character === "'") {
+            return this.recognizeRune();
+        }
         
         if (CharUtils.isOperator(character)) {
             return this.recognizeOperator();
@@ -358,12 +362,24 @@ export class Lexer {
     recognizeString(): Token {
         let line = this.line;
         let column = this.column;
-        const results = /^["|'][\w ]+["|']/.exec(this.input.substring(this.position));
+        const results = /^"\w+"/.exec(this.input.substring(this.position));
         if (!results) {
             return new Token(TokenTypes.Unknown, '', line, column);
         }
         this.position += results[0].length;
         this.column += results[0].length;
         return new Token(TokenTypes.StringLiteral, results[0], line, column); 
+    }
+
+    recognizeRune(): Token {
+        let line = this.line;
+        let column = this.column;
+        const results = /^'\w'/.exec(this.input.substring(this.position));
+        if (!results) {
+            return new Token(TokenTypes.Unknown, '', line, column);
+        }
+        this.position += results[0].length;
+        this.column += results[0].length;
+        return new Token(TokenTypes.RuneLiteral, results[0], line, column); 
     }
 }
