@@ -39,6 +39,7 @@ import { FieldAccessExpression } from './fieldAccessExpression';
 import { AccessAssignStatement } from './accessAssignStatement';
 import { WhileStatement } from './whileStatement';
 import { FuncCallStatement } from './funcCallStatement';
+import { FuncCallExpression } from './funcCallExpression';
 
 export class Parser {
     private binopLevels: any;
@@ -98,7 +99,7 @@ export class Parser {
 				
 		this.errorToken = token;
         this.errors++;
-        throw new Error('Unexpected token type');
+        throw new Error('Unexpected token type ' + token.getType() + ' expected ' + expectedType);
 	}
 
     private eatToken(expectedType: string): boolean {
@@ -583,7 +584,11 @@ export class Parser {
 		case TokenTypes.Identifier:
 			const id = this.parseIdentifier();
             this.identifiers.push(id);
-            // TODO: Check if it's a func call so func calls can be expressions
+            // Check if it's a func call so func calls can be expressions
+            if (this.token.getType() === TokenTypes.Lparent) {
+                const params = this.parseFuncCallParameters();
+                return new FuncCallExpression(id, params);
+            }
 			return new IdentifierExpression(id);
 
 		case TokenTypes.Not:

@@ -19,6 +19,7 @@ command myFunc(void) {
     a = 10;
     a++;
     a--;
+    b = myBoolFunc();
     b = true;
     c.a = "wow";
     c.b = 228;
@@ -30,6 +31,9 @@ command myFunc(void) {
     var integer counter;
     while (counter < (a + 5)) {
         print(counter);
+        a = read(12, (1 + 2));
         counter++;
     }
 }
+
+myFunc();
