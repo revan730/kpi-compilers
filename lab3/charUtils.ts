@@ -34,7 +34,7 @@ const reserved = [
     TokenTypes.Manifest,
     TokenTypes.If,
     TokenTypes.Else,
-    TokenTypes.For,
+    TokenTypes.While,
     TokenTypes.Void,
     TokenTypes.Var,
     TokenTypes.Complex,

@@ -35,6 +35,9 @@ import { ReturnStatement } from './returnStatement';
 import { FieldAssignment, ComplexAssignStatement } from './ComplexAssignStatement';
 import { PostIncrementStatement } from './postIncrement';
 import { PostDecrementStatement } from './postDecrement';
+import { FieldAccessExpression } from './fieldAccessExpression';
+import { AccessAssignStatement } from './accessAssignStatement';
+import { WhileStatement } from './whileStatement';
 
 export class Parser {
     private binopLevels: any;
@@ -54,6 +57,7 @@ export class Parser {
 
     private initBinopLevels() {
         this.binopLevels = {};
+        this.binopLevels[TokenTypes.Dot] = 5;
         this.binopLevels[TokenTypes.And] = 10;
         this.binopLevels[TokenTypes.Or] = 10;
         this.binopLevels[TokenTypes.Lt] = 20;
@@ -97,6 +101,7 @@ export class Parser {
 	}
 
     private eatToken(expectedType: string): boolean {
+        console.log('expected ', expectedType);
         const actualType = this.token.getType();
         if (expectedType === actualType) {
             this.nextToken();
@@ -217,7 +222,7 @@ export class Parser {
     private parseStatementList(): any[] {
         this.skipTo([TokenTypes.Semi,
             TokenTypes.If,
-            TokenTypes.For,
+            TokenTypes.While,
             TokenTypes.Lparent,
             TokenTypes.Lbrace,
             TokenTypes.Identifier,
@@ -233,13 +238,12 @@ export class Parser {
     }
 
     private isStatement(): boolean {
-        console.log('t ', this.token.getType(), this.token.getType().length);
 		switch(this.token.getType()){
         case TokenTypes.Semi:
             return  true
         case TokenTypes.If:
             return  true
-        case TokenTypes.For:
+        case TokenTypes.While:
             return  true
         case TokenTypes.Lparent:
             return  true
@@ -252,7 +256,6 @@ export class Parser {
         case TokenTypes.Command:
             return true;
         case TokenTypes.Func:
-            console.log('why da fuck not here');
             return true;
         case TokenTypes.Var:
             return true;
@@ -379,6 +382,34 @@ export class Parser {
 			}
 			return new IfStatement(condExp, trueStm, null);
         }
+
+        // while ::= while '('Exp')' Statement
+		if (this.token.getType() == TokenTypes.While) {
+			this.eatToken(TokenTypes.While);
+
+			// parse looping condition
+			if (!this.eatToken(TokenTypes.Lparent))
+				this.skipTo([TokenTypes.Rparent, TokenTypes.Lbrace, TokenTypes.Rbrace]);
+
+			const condExp = this.parseExp();
+			this.conditions.push(condExp);
+			
+
+			if (!this.eatToken(TokenTypes.Rparent))
+				this.skipTo([TokenTypes.Lbrace, TokenTypes.Semi, TokenTypes.Rbrace]);
+
+			let loopStm: BlockStatement | Statement;
+
+			// BLock ::= '{' StatementList '}' 
+			if (this.token.getType() == TokenTypes.Lbrace)
+				loopStm = this.parseBlock();
+
+			else
+				// parse looping statement
+				loopStm = this.parseStatement();
+
+			return new WhileStatement(condExp, loopStm);
+}
         
         if (this.token.getType() === TokenTypes.Var) {
             this.eatToken(TokenTypes.Var);
@@ -417,7 +448,7 @@ export class Parser {
 				return assign;
             }
             
-            
+            // Postfix ops
             if (this.token.getType() === TokenTypes.PostIncrement || this.token.getType() === TokenTypes.PostDecrement) {
                 if (this.token.getType() === TokenTypes.PostDecrement) {
                     this.eatToken(TokenTypes.PostDecrement);
@@ -429,11 +460,18 @@ export class Parser {
                 return new PostIncrementStatement(id);
             }
 
-            // TODO: complex type field access
+            // field access with assignment
+            if (this.token.getType() === TokenTypes.Dot) {
+                this.eatToken(TokenTypes.Dot);
+                const field = this.parseIdentifier();
+                this.eatToken(TokenTypes.Assign);
+                const value = this.parseExp();
+                this.eatToken(TokenTypes.Semi);
 
+                return new AccessAssignStatement(id.getValue(), field, value);
+            }
         }
 
-        console.log('token type here', this.token.getType());
         if (this.token.getType() === TokenTypes.Command || this.token.getType() === TokenTypes.Func) {
             const isFunc = this.token.getType() === TokenTypes.Func;
             this.eatToken(this.token.getType());
@@ -455,12 +493,17 @@ export class Parser {
         if (this.token.getType() === TokenTypes.Return) {
             this.eatToken(TokenTypes.Return);
 
+            // Looking to see if it's a void return;
+            if (this.token.getType() === TokenTypes.Semi) {
+                this.eatToken(TokenTypes.Semi);
+                return new ReturnStatement(null);
+            }
+
             const value = this.parseExp();
 				
 			this.eatToken(TokenTypes.Semi);
 
-			const ret = new ReturnStatement(value);
-			return ret;
+			return new ReturnStatement(value);
         }
         
         // Complex type specification statement
@@ -474,8 +517,8 @@ export class Parser {
             this.complexTypes.push(complexType);
             return complexType;
         }
-        console.log('token type here', this.token.getType());
         // statement type unknown
+        console.log('why is it unknown if its ', this.token.getType());
 		this.eatToken(TokenTypes.Unknown);
 		this.nextToken();
 		return null;
@@ -487,7 +530,6 @@ export class Parser {
     }
 
     private parsePrimaryExp(): Expression {
-        console.log('fuck this ', this.token.getType());
 		switch (this.token.getType()) {
 		case TokenTypes.IntegerLiteral:
 			const intValue = Number(this.token.getValue());
@@ -541,7 +583,6 @@ export class Parser {
 		while (true) {
 			// grab operator precedence (-1 for non-operator token)
             let val = this.binopLevels[this.token.getType()];
-            console.log('fucking val', val);
 			const tokenLevel = (val !== undefined) ? val : -1;
 
 			// either op precedence is lower than prev op or token is not an op
@@ -550,7 +591,6 @@ export class Parser {
 
 			// save binop before parsing rhs of exp
             const binop = this.token.getType();
-            console.log('this is not a fucking binop ', binop);
 			this.eatToken(binop);
 
 			let rhs = this.parsePrimaryExp(); // parse rhs of exp
@@ -600,7 +640,10 @@ export class Parser {
 				break;
 			case TokenTypes.Div:
 				lhs = new DivExpression(lhs, rhs);
-				break;
+                break;
+            case TokenTypes.Dot:
+                lhs = new FieldAccessExpression(lhs, rhs);
+                break;
 			default:
 				this.eatToken(TokenTypes.Unknown);
 				break;

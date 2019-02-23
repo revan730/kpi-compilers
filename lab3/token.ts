@@ -37,7 +37,7 @@ export namespace TokenTypes {
     export const Manifest = 'manifest';
     export const If = 'if';
     export const Else = 'else';
-    export const For = 'for';
+    export const While = 'while';
     export const Void = 'void';
     export const Var = 'var';
     export const Command = 'command';

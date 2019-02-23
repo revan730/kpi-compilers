@@ -26,10 +26,10 @@ command myFunc(void) {
         return;
     } else {
         b = !b;
-        a = 10 & 1;
     }
     var integer counter;
-    for (counter = 1;counter < (a + 5);counter++) {
+    while (counter < (a + 5)) {
         print(counter);
+        counter++;
     }
 }
