@@ -1,8 +1,8 @@
-import { Statement } from "./statement";
+import { Statement } from "./ast/statement";
 import { Parser } from "./parser";
-import { ComplexType } from "./complexType";
+import { ComplexType } from "./ast/complexType";
 import * as CharUtils from "./charUtils";
-import { ComplexField } from "./complexField";
+import { ComplexField } from "./ast/complexField";
 
 export class SemanticAnalyzer {
     private statements: Statement[];

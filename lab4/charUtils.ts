@@ -82,23 +82,23 @@ export function isDigit(character: string): boolean {
 }
 
 export function isOperator(character: string): boolean {
-    return operators.indexOf(character) !== -1 ? true: false
+    return operators.indexOf(character) !== -1;
 }
 
 export function isComparisonOperator(character: string): boolean {
-    return compOperators.indexOf(character) !== -1 ? true: false
+    return compOperators.indexOf(character) !== -1;
 }
 
 export function isArithmeticOperator(character: string): boolean {
-    return arithmeticOperators.indexOf(character) !== -1 ? true: false
+    return arithmeticOperators.indexOf(character) !== -1;
 }
 
 export function isPostfixOperator(character: string): boolean {
-    return postfixOperators.indexOf(character) !== -1 ? true: false
+    return postfixOperators.indexOf(character) !== -1;
 }
 
 export function isLogicalOperator(character: string): boolean {
-    return logicalOperators.indexOf(character) !== -1 ? true: false
+    return logicalOperators.indexOf(character) !== -1;
 }
 
 export function isParenthesis(character: string): boolean {
@@ -114,11 +114,11 @@ export function isWhitespaceOrNewLine(character: string): boolean {
 }
 
 export function isPunctuation(character: string): boolean {
-    return punctuationChars.indexOf(character) !== -1 ? true: false
+    return punctuationChars.indexOf(character) !== -1;
 }
 
 export function isIdentifierReserved(character: string): boolean {
-    return reserved.indexOf(character) !== -1 ? true: false
+    return reserved.indexOf(character) !== -1;
 }
 
 export function isBracket(character: string): boolean {
