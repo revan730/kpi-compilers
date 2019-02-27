@@ -5,4 +5,12 @@ export class VarDeclaration {
         this.type = type;
         this.identifier = identifier;
     }
+
+    public getType(): string {
+        return this.type;
+    }
+
+    public getId(): string {
+        return this.identifier;
+    }
 }

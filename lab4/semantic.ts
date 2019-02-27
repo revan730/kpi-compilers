@@ -6,6 +6,8 @@ import { Statement } from "./ast/statement";
 import * as CharUtils from "./charUtils";
 import { Parser } from "./parser";
 import { FunctionParameter } from "./ast/functionParameter";
+import { IdentifierExpression } from "./ast/identifierExpression";
+import { VarDeclaration } from "./ast/varDeclaration";
 
 export interface Scope {
     statements: Statement[];
@@ -43,6 +45,11 @@ export class SemanticAnalyzer {
         if (s instanceof ReturnStatement) {
             this.checkReturn(s, scope, scope.retType);
         }
+
+        if (s instanceof VarDeclaration) {
+            this.checkVariableDeclaration(s, scope);
+        }
+
     }
 
     public analyzeFile() {
@@ -50,6 +57,7 @@ export class SemanticAnalyzer {
         this.complexTypeDeclarations = [];
         this.functionDeclarations = [];
         this.assigns = [];
+        this.declarations = [];
         for (const s of this.statements) {
             this.analyze(s, null);
         }
@@ -57,7 +65,7 @@ export class SemanticAnalyzer {
 
     public findFunctionDeclaration(id: string, s: Scope) {
         // Functions are global, so no need to traverse local scopes
-        const func = this.functionDeclarations.find(f => f.id === id);
+        const func = this.functionDeclarations.find((f: Func) => f.getId() === id);
         if (!func) {
             throw new Error(`SH??: Function with id ${id} not declared`);
         }
@@ -68,17 +76,14 @@ export class SemanticAnalyzer {
         // Traverse through scopes
         let currentScope = s;
         while(currentScope !== null) {
-            const varDec = s.declarations.find(d => d.identifier === id);
+            const varDec = s.declarations.find(d => d.getId() === id);
             if (varDec) {
                 return varDec;
             }
             currentScope = currentScope.parentContext;
         }
         // In file context
-        const varDec = this.declarations.find(d => d.id === id);
-        if (!varDec) {
-            throw new Error(`SH??: Variable with id ${id} not declared`);
-        }
+        const varDec = this.declarations.find(d => d.getId() === id);
 
         return varDec;
     }
@@ -90,7 +95,7 @@ export class SemanticAnalyzer {
             const id = s.getId();
             // SH04: Unknown type
             const isReserved = !CharUtils.isIdentifierReserved(fieldType);
-            if (isReserved && !this.complexTypeDeclarations.find(ct => ct.id === fieldType)) {
+            if (isReserved && !this.complexTypeDeclarations.find((ct: ComplexType) => ct.getId() === fieldType)) {
                 throw new Error(`SH04: Unknown type ${fieldType}`);
             }
             if (identifiers.indexOf(id) > -1) {
@@ -104,7 +109,7 @@ export class SemanticAnalyzer {
         const id = c.getId();
         const fields = c.getFields();
         // SH01: Complex type already defined
-        if (this.complexTypeDeclarations.find(ct => ct.id === id)) {
+        if (this.complexTypeDeclarations.find((ct: ComplexType) => ct.getId() === id)) {
             throw new Error(`SH01: Complex type ${id} already declared`);
         }
         // SH02: Reserved identifier
@@ -130,6 +135,26 @@ export class SemanticAnalyzer {
 
     }
 
+    public checkVariableDeclaration(dec: VarDeclaration, scope: Scope) {
+        const id = dec.getId();
+        const type = dec.getType();
+        if (this.findVariableDeclaration(id, scope)) {
+            throw new Error(`SH10: Variable with id ${id} already declared`);
+        }
+
+        const isReserved = !CharUtils.isIdentifierReserved(type);
+        if (isReserved && !this.complexTypeDeclarations.find((ct: ComplexType) => ct.getId() === type)) {
+            throw new Error(`SH04: Unknown type ${type}`);
+        }
+        if (scope) {
+            // Variables can be local
+            scope.declarations.push(dec);
+        } else {
+            // Global (file scope) var
+            this.declarations.push(dec);
+        }
+    }
+
     public checkFunctionParameters(funcID: string, params: FunctionParameter[]) {
         const identifiers = [];
         for (const s of params) {
@@ -137,7 +162,7 @@ export class SemanticAnalyzer {
             const id = s.getId();
             // SH04: Unknown type
             const isReserved = !CharUtils.isIdentifierReserved(paramType);
-            if (isReserved && !this.complexTypeDeclarations.find(ct => ct.id === paramType)) {
+            if (isReserved && !this.complexTypeDeclarations.find((ct: ComplexType) => ct.getId() === paramType)) {
                 throw new Error(`SH04: Unknown type ${paramType}`);
             }
             if (identifiers.indexOf(id) > -1) {
@@ -154,7 +179,7 @@ export class SemanticAnalyzer {
         const retType = f.getReturnType();
 
         // SH06: Function already defined
-        if (this.functionDeclarations.find(f => f.id === id)) {
+        if (this.functionDeclarations.find((f: Func) => f.getId() === id)) {
             throw new Error(`SH06: Function ${id} already declared`);
         }
 
@@ -163,8 +188,13 @@ export class SemanticAnalyzer {
             throw new Error(`SH02: Reserved indentifier ${id}`);
         }
 
-        // TODO: Check parameters
-        // TODO: Pass parameters into scope variable declaration
+        // SH04: Unknown type
+        if (retType) {
+            const isReserved = !CharUtils.isIdentifierReserved(retType);
+            if (isReserved && !this.complexTypeDeclarations.find((ct: ComplexType) => ct.getId() === retType)) {
+                throw new Error(`SH04: Unknown type ${retType}`);
+            }
+        }
 
         this.checkFunctionParameters(id, params);
 
@@ -185,15 +215,6 @@ export class SemanticAnalyzer {
         }
 
 
-        // TODO: Add to function declarations
         this.functionDeclarations.push(f);
-
-        // TODO: check statements inside body
-        // TODO: check variable declarations before checking return type
-
-        // SH07: If not command, check if return is present
-        /*if (funcType && returnsCount === 0) {
-            throw new Error(`SH07: Missing return statement`);
-        }*/
     }
 }
