@@ -10,7 +10,10 @@ interface Scope {
     statements: Statement[];
     assigns: any;
     // TODO: Parent context
-    context: any; // null - File
+    returns: any;
+    declarations: any;
+    parentContext: any;
+    retType: any; // If in function scope
 }
 
 export class SemanticAnalyzer {
@@ -25,16 +28,28 @@ export class SemanticAnalyzer {
         this.parser = new Parser(input);
     }
 
-    public analyze(scope: Scope) {
-        this.checkComplexTypes(scope);
+    public analyze(s: Statement, scope: Scope) {
+        if (s instanceof ComplexType) {
+            this.checkComplexType(s, scope);
+        }
+
+        if (s instanceof Func) {
+            this.checkFunction(s, scope);
+        }
+
+        if (s instanceof ReturnStatement) {
+            this.checkReturn(s, scope, scope.retType);
+        }
     }
 
     public analyzeFile() {
         this.statements = this.parser.parseProgram();
         this.complexTypeDeclarations = [];
-        // TODO: Rewrite, process from first statement to last, don't jump by rule groups
-        // ex. if current statement is complex type definition, check it with complex type definition rules
-        this.analyze(null);
+        this.functionDeclarations = [];
+        this.assigns = [];
+        for (const s of this.statements) {
+            this.analyze(s, null);
+        }
     }
 
     public checkComplexTypeFields(complexID: string, fields: ComplexField[]) {
@@ -54,85 +69,70 @@ export class SemanticAnalyzer {
         }
     }
 
-    public checkComplexTypes(scope: Scope) {
-        let statements = [];
-        if (scope) {
-            statements = scope.statements;
-        } else {
-            statements = this.statements;
+    public checkComplexType(c: ComplexType, scope: Scope) {
+        const id = c.getId();
+        const fields = c.getFields();
+        // SH01: Complex type already defined
+        if (this.complexTypeDeclarations.find(ct => ct.id === id)) {
+            throw new Error(`SH01: Complex type ${id} already declared`);
         }
-        for (const s of statements) {
-            if (s instanceof ComplexType) {
-                const id = s.getId();
-                const fields = s.getFields();
-                // SH01: Complex type already defined
-                if (this.complexTypeDeclarations.find(ct => ct.id === id)) {
-                    throw new Error(`SH01: Complex type ${id} already declared`);
-                }
-                // SH02: Reserved identifier
-                if (CharUtils.isIdentifierReserved(id)) {
-                    throw new Error(`SH02: Reserved indentifier ${id}`);
-                }
-                // SH03: Empty complex type declaration
-                if (fields.length === 0) {
-                    throw new Error(`SH03: Empty complex type ${id} declaration`);
-                }
+        // SH02: Reserved identifier
+        if (CharUtils.isIdentifierReserved(id)) {
+            throw new Error(`SH02: Reserved indentifier ${id}`);
+        }
+        // SH03: Empty complex type declaration
+        if (fields.length === 0) {
+             throw new Error(`SH03: Empty complex type ${id} declaration`);
+        }
 
-                this.checkComplexTypeFields(id, fields);
-                this.complexTypeDeclarations.push(s);
-            }
-        }
+        this.checkComplexTypeFields(id, fields);
+        this.complexTypeDeclarations.push(c);
     }
 
-    public checkReturns(funcBody: Statement[], funcType: string) {
-        let returnsCount = 0;
-        for (const s of funcBody) {
-            if (s instanceof ReturnStatement) {
-                // TODO: Expression evaluation
-                const retType = s.evaluateType().getType();
-                returnsCount += 1;
-                // SH08 Return type doesn't match with function's
-                if (retType !== funcType) {
-                    throw new Error(`SH08: Type ${retType} doesn't match with ${funcType}`);
-                }
-            }
+    public checkReturn(r: ReturnStatement, scope: Scope, funcType: string) {
+        // TODO: Expression evaluation
+        const retType = r.evaluateType(scope).getType();
+        // SH08 Return type doesn't match with function's
+        if (retType !== funcType) {
+            throw new Error(`SH08: Type ${retType} doesn't match with ${funcType}`);
         }
+
+    }
+
+    public checkFunction(f: Func, scope: Scope) {
+        const id = f.getId();
+        const params = f.getParams();
+        const body = f.getBody().getStatementsList();
+        const retType = f.getReturnType();
+
+        // SH06: Function already defined
+        if (this.functionDeclarations.find(f => f.id === id)) {
+            throw new Error(`SH06: Function ${id} already declared`);
+        }
+
+        // SH02: Reserved identifier
+        if (CharUtils.isIdentifierReserved(id)) {
+            throw new Error(`SH02: Reserved indentifier ${id}`);
+        }
+
+        // Descend into function body
+        const bodyScope = {
+            declarations: [],
+            returns: [],
+            assigns: [],
+            parentContext: null,
+        };
+
+        for (const s of body) {
+            this.analyze(s, scope);
+        }
+
+        // TODO: check statements inside body
+        // TODO: check variable declarations before checking return type
 
         // SH07: If not command, check if return is present
-        if (funcType && returnsCount === 0) {
+        /*if (funcType && returnsCount === 0) {
             throw new Error(`SH07: Missing return statement`);
-        }
-    }
-
-    public checkFunctions(scope: Scope) {
-        let statements = [];
-        if (scope) {
-            statements = scope.statements;
-        } else {
-            statements = this.statements;
-        }
-        for (const s of statements) {
-            if (s instanceof Func) {
-                const id = s.getId();
-                const params = s.getParams();
-                const body = s.getBody().getStatementsList();
-                const retType = s.getReturnType();
-
-                // SH06: Function already defined
-                if (this.functionDeclarations.find(f => f.id === id)) {
-                    throw new Error(`SH06: Function ${id} already declared`);
-                }
-
-                // SH02: Reserved identifier
-                if (CharUtils.isIdentifierReserved(id)) {
-                    throw new Error(`SH02: Reserved indentifier ${id}`);
-                }
-
-                // TODO: check statements inside body
-                // TODO: check variable declarations before checking return type
-
-                this.checkReturns(body, retType);
-            }
-        }
+        }*/
     }
 }
