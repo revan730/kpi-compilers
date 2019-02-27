@@ -8,7 +8,7 @@ func boolean myBoolFunc(void) {
     return nestedFunc();
 }
 
-command myFunc(void) {
+command myFunc(boolean a) {
     var integer a;
     var boolean b;
     var rune r;

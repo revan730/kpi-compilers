@@ -14,6 +14,9 @@ export class ReturnStatement implements Statement {
     }
 
     public evaluateType(s: Scope): string {
+        if (!this.value) {
+            return null;
+        }
         return this.value.evaluateType(s);
     }
 }

@@ -5,6 +5,7 @@ import { ReturnStatement } from "./ast/returnStatement";
 import { Statement } from "./ast/statement";
 import * as CharUtils from "./charUtils";
 import { Parser } from "./parser";
+import { FunctionParameter } from "./ast/functionParameter";
 
 export interface Scope {
     statements: Statement[];
@@ -120,13 +121,30 @@ export class SemanticAnalyzer {
     }
 
     public checkReturn(r: ReturnStatement, scope: Scope, funcType: string) {
-        // TODO: Expression evaluation
         const retType = r.evaluateType(scope);
+
         // SH08 Return type doesn't match with function's
         if (retType !== funcType) {
-            throw new Error(`SH08: Type ${retType} doesn't match with ${funcType}`);
+            throw new Error(`SH08: Type ${retType} doesn't match with ${funcType} `);
         }
 
+    }
+
+    public checkFunctionParameters(funcID: string, params: FunctionParameter[]) {
+        const identifiers = [];
+        for (const s of params) {
+            const paramType = s.getType();
+            const id = s.getId();
+            // SH04: Unknown type
+            const isReserved = !CharUtils.isIdentifierReserved(paramType);
+            if (isReserved && !this.complexTypeDeclarations.find(ct => ct.id === paramType)) {
+                throw new Error(`SH04: Unknown type ${paramType}`);
+            }
+            if (identifiers.indexOf(id) > -1) {
+                throw new Error(`SH09: Param with id ${id} already declared for ${funcID}`);
+            }
+            identifiers.push(id);
+        }
     }
 
     public checkFunction(f: Func, scope: Scope) {
@@ -145,9 +163,14 @@ export class SemanticAnalyzer {
             throw new Error(`SH02: Reserved indentifier ${id}`);
         }
 
+        // TODO: Check parameters
+        // TODO: Pass parameters into scope variable declaration
+
+        this.checkFunctionParameters(id, params);
+
         // Descend into function body
         const bodyScope = {
-            declarations: [],
+            declarations: [...params],
             returns: [],
             assigns: [],
             statements: [],
@@ -156,9 +179,14 @@ export class SemanticAnalyzer {
             parentContext: null,
         };
 
+
         for (const s of body) {
             this.analyze(s, bodyScope);
         }
+
+
+        // TODO: Add to function declarations
+        this.functionDeclarations.push(f);
 
         // TODO: check statements inside body
         // TODO: check variable declarations before checking return type

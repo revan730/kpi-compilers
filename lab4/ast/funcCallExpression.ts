@@ -19,6 +19,6 @@ export class FuncCallExpression implements Expression {
 
     public evaluateType(s: Scope): string {
         // Expression type is function's return type
-        return s.analyzer.findFunctionDeclaration(this.id, s);
+        return s.analyzer.findFunctionDeclaration(this.id, s).getReturnType();
     }
 }

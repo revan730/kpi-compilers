@@ -28,7 +28,7 @@ export class OrExpression implements Expression {
         }
 
         if (lhsType !== TokenTypes.Boolean) {
-            throw new Error(`SH??: Non-boolean type in integer-only operator expression '${lhsType}'`);
+            throw new Error(`SH??: Non-boolean type in boolean-only operator expression '${lhsType}'`);
         }
 
         return TokenTypes.Boolean; // Boolean op
