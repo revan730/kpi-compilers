@@ -1,3 +1,4 @@
+import { Scope } from "../semantic";
 import { Expression } from "./expression";
 
 export class FuncCallExpression implements Expression {
@@ -7,10 +8,17 @@ export class FuncCallExpression implements Expression {
         this.id = id;
         this.params = params;
     }
-    getId = () => {
+
+    public getId = () => {
         return this.id;
-    };
-    getParams = () => {
+    }
+
+    public getParams = () => {
         return this.params;
-    };
+    }
+
+    public evaluateType(s: Scope): string {
+        // Expression type is function's return type
+        return s.analyzer.findFunctionDeclaration(this.id, s);
+    }
 }

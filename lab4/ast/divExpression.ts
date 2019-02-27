@@ -1,3 +1,5 @@
+import { Scope } from "../semantic";
+import { TokenTypes } from "../token";
 import { Expression } from "./expression";
 
 export class DivExpression implements Expression {
@@ -7,10 +9,27 @@ export class DivExpression implements Expression {
         this.lhs = lhs;
         this.rhs = rhs;
     }
-    getLHS = () => {
+
+    public getLHS = () => {
         return this.lhs;
-    };
-    getRHS = () => {
+    }
+
+    public getRHS = () => {
         return this.rhs;
-    };
+    }
+
+    public evaluateType(s: Scope): string {
+        const lhsType = this.lhs.evaluateType(s);
+        const rhsType = this.rhs.evaluateType(s);
+
+        if (lhsType !== rhsType) {
+            throw new Error(`SH??: Non-matching expression types '${lhsType}' and '${rhsType}'`);
+        }
+
+        if (lhsType !== TokenTypes.Integer) {
+            throw new Error(`SH??: Non-integer type in integer-only operator expression '${lhsType}'`);
+        }
+
+        return lhsType; // Both are equal so whatever
+    }
 }

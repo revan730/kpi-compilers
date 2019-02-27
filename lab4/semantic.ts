@@ -1,12 +1,12 @@
-import { Statement } from "./ast/statement";
-import { Parser } from "./parser";
-import { ComplexType } from "./ast/complexType";
-import * as CharUtils from "./charUtils";
 import { ComplexField } from "./ast/complexField";
+import { ComplexType } from "./ast/complexType";
 import { Func } from "./ast/func";
 import { ReturnStatement } from "./ast/returnStatement";
+import { Statement } from "./ast/statement";
+import * as CharUtils from "./charUtils";
+import { Parser } from "./parser";
 
-interface Scope {
+export interface Scope {
     statements: Statement[];
     assigns: any;
     // TODO: Parent context
@@ -14,12 +14,14 @@ interface Scope {
     declarations: any;
     parentContext: any;
     retType: any; // If in function scope
+    analyzer: SemanticAnalyzer;
 }
 
 export class SemanticAnalyzer {
     private statements: Statement[];
     private complexTypeDeclarations: any;
     private functionDeclarations: any;
+    private declarations: any;
     private assigns: any;
     private conditions: any;
     private parser: Parser;
@@ -50,6 +52,34 @@ export class SemanticAnalyzer {
         for (const s of this.statements) {
             this.analyze(s, null);
         }
+    }
+
+    public findFunctionDeclaration(id: string, s: Scope) {
+        // Functions are global, so no need to traverse local scopes
+        const func = this.functionDeclarations.find(f => f.id === id);
+        if (!func) {
+            throw new Error(`SH??: Function with id ${id} not declared`);
+        }
+        return func;
+    }
+
+    public findVariableDeclaration(id: string, s: Scope) {
+        // Traverse through scopes
+        let currentScope = s;
+        while(currentScope !== null) {
+            const varDec = s.declarations.find(d => d.identifier === id);
+            if (varDec) {
+                return varDec;
+            }
+            currentScope = currentScope.parentContext;
+        }
+        // In file context
+        const varDec = this.declarations.find(d => d.id === id);
+        if (!varDec) {
+            throw new Error(`SH??: Variable with id ${id} not declared`);
+        }
+
+        return varDec;
     }
 
     public checkComplexTypeFields(complexID: string, fields: ComplexField[]) {
@@ -91,7 +121,7 @@ export class SemanticAnalyzer {
 
     public checkReturn(r: ReturnStatement, scope: Scope, funcType: string) {
         // TODO: Expression evaluation
-        const retType = r.evaluateType(scope).getType();
+        const retType = r.evaluateType(scope);
         // SH08 Return type doesn't match with function's
         if (retType !== funcType) {
             throw new Error(`SH08: Type ${retType} doesn't match with ${funcType}`);
@@ -120,11 +150,14 @@ export class SemanticAnalyzer {
             declarations: [],
             returns: [],
             assigns: [],
+            statements: [],
+            retType,
+            analyzer: this,
             parentContext: null,
         };
 
         for (const s of body) {
-            this.analyze(s, scope);
+            this.analyze(s, bodyScope);
         }
 
         // TODO: check statements inside body
