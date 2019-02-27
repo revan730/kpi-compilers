@@ -88,6 +88,15 @@ export class SemanticAnalyzer {
         return varDec;
     }
 
+    public findComplexFieldDeclaration(complexTypeId: string, fieldId: string) {
+        const complex = this.complexTypeDeclarations.find((ct: ComplexType) => ct.getId() === complexTypeId);
+        const field = complex.getFields().find((f: ComplexField) => f.getId() === fieldId);
+        if (!field) {
+            throw new Error(`SH??: Complex type '${complexTypeId}' has no field ${fieldId}`);
+        }
+        return field;
+    }
+
     public checkComplexTypeFields(complexID: string, fields: ComplexField[]) {
         const identifiers = [];
         for (const s of fields) {
