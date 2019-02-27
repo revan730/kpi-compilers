@@ -4,7 +4,8 @@ complex myType {
 }
 
 func boolean myBoolFunc(void) {
-    return false;
+    func boolean nestedFunc(void) {return true;}
+    return nestedFunc();
 }
 
 command myFunc(void) {

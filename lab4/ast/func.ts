@@ -25,4 +25,8 @@ export class Func {
     public getBody(): BlockStatement {
         return this.body;
     }
+
+    public getReturnType(): string {
+        return this.returnType;
+    }
 }
