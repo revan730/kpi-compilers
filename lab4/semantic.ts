@@ -8,6 +8,8 @@ import { Parser } from "./parser";
 import { FunctionParameter } from "./ast/functionParameter";
 import { IdentifierExpression } from "./ast/identifierExpression";
 import { VarDeclaration } from "./ast/varDeclaration";
+import { IfStatement } from "./ast/ifStatement";
+import { TokenTypes } from "./token";
 
 export interface Scope {
     statements: Statement[];
@@ -50,6 +52,10 @@ export class SemanticAnalyzer {
             this.checkVariableDeclaration(s, scope);
         }
 
+        if (s instanceof IfStatement) {
+            this.checkIf(s, scope);
+        }
+
     }
 
     public analyzeFile() {
@@ -88,9 +94,17 @@ export class SemanticAnalyzer {
         return varDec;
     }
 
-    public findComplexFieldDeclaration(complexTypeId: string, fieldId: string) {
-        const complex = this.complexTypeDeclarations.find((ct: ComplexType) => ct.getId() === complexTypeId);
-        const field = complex.getFields().find((f: ComplexField) => f.getId() === fieldId);
+    public findComplexFieldDeclaration(complexTypeId: string, fieldId: string, s: Scope) {
+        // Find VARIABLE with compexTypeId, check if it's complex, then check it's field type
+        const complex = this.findVariableDeclaration(complexTypeId, s);
+        if (!complex) {
+            throw new Error(`SH??: Complex type variable with id '${complexTypeId}' not found`);
+        }
+        const complexType = this.complexTypeDeclarations.find((ct: ComplexType) => ct.getId() === complex.getType());
+        if (!complexType) {
+            throw new Error(`SH??: Complex type '${complex.getId()}' not declared`);
+        }
+        const field = complexType.getFields().find((f: ComplexField) => f.getId() === fieldId);
         if (!field) {
             throw new Error(`SH??: Complex type '${complexTypeId}' has no field ${fieldId}`);
         }
@@ -161,6 +175,13 @@ export class SemanticAnalyzer {
         } else {
             // Global (file scope) var
             this.declarations.push(dec);
+        }
+    }
+
+    public checkIf(st: IfStatement, sc: Scope) {
+        const condType = st.getCondExp().evaluateType(sc);
+        if (condType !== TokenTypes.Boolean) {
+            throw new Error(`SH11: If statement's condition type is ${condType} but boolean expected`);
         }
     }
 

@@ -12,7 +12,7 @@ export class IfStatement implements Statement {
         this.falseStm = falseStm;
     }
 
-    public getCondExp(): Statement {
+    public getCondExp(): Expression {
 		return this.condExp;
 	}
 	

@@ -1,11 +1,13 @@
 import { Expression } from "./expression";
 import { Scope } from "../semantic";
+import { VarDeclaration } from "./varDeclaration";
+import { IdentifierExpression } from "./identifierExpression";
 
 export class FieldAccessExpression implements Expression {
-    private lhs: Expression;
-    private rhs: Expression;
+    private lhs: IdentifierExpression;
+    private rhs: IdentifierExpression;
 
-    constructor(lhs: Expression, rhs: Expression) {
+    constructor(lhs: IdentifierExpression, rhs: IdentifierExpression) {
         this.lhs = lhs;
         this.rhs = rhs;
     }
@@ -19,8 +21,8 @@ export class FieldAccessExpression implements Expression {
     }
 
     evaluateType(s: Scope): string {
-        const complexType = this.lhs.evaluateType(s);
-        const fieldType = this.rhs.evaluateType(s);
-        return s.analyzer.findComplexFieldDeclaration(complexType, fieldType).getType();
+        const complexType = this.lhs.getValue();
+        const fieldType = this.rhs.getValue();
+        return s.analyzer.findComplexFieldDeclaration(complexType, fieldType, s).getType();
     }
 }

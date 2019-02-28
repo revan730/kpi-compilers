@@ -27,9 +27,6 @@ export class NotEqualExpression implements Expression {
             throw new Error(`SH??: Non-matching expression types '${lhsType}' and '${rhsType}'`);
         }
 
-        if (lhsType !== TokenTypes.Integer) {
-            throw new Error(`SH??: Non-integer type in integer-only operator expression '${lhsType}'`);
-        }
 
         return TokenTypes.Boolean; // Logic op
     }
