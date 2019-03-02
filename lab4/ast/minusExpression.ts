@@ -32,4 +32,10 @@ export class MinusExpression implements Expression {
 
         return TokenTypes.Integer; // Arithmetic op
     }
+
+    public getIdentifiers(): string[] {
+        const lhsIdentifiers = this.lhs.getIdentifiers();
+        const rhsIdentifiers = this.rhs.getIdentifiers();
+        return lhsIdentifiers.concat(rhsIdentifiers);
+    }
 }

@@ -15,4 +15,8 @@ export class IntegerLiteral implements Expression {
     public evaluateType(): string {
         return TokenTypes.Integer;
     }
+
+    public getIdentifiers(): string[] {
+        return [];
+    }
 }

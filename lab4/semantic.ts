@@ -10,6 +10,11 @@ import { IdentifierExpression } from "./ast/identifierExpression";
 import { VarDeclaration } from "./ast/varDeclaration";
 import { IfStatement } from "./ast/ifStatement";
 import { TokenTypes } from "./token";
+import { WhileStatement } from "./ast/whileStatement";
+import { AssignStatement } from "./ast/assignStatement";
+import { FuncCallStatement } from "./ast/funcCallStatement";
+import { PostDecrementStatement } from "./ast/postDecrement";
+import { PostIncrementStatement } from "./ast/postIncrement";
 
 export interface Scope {
     statements: Statement[];
@@ -54,6 +59,10 @@ export class SemanticAnalyzer {
 
         if (s instanceof IfStatement) {
             this.checkIf(s, scope);
+        }
+
+        if (s instanceof WhileStatement) {
+            this.checkWhile(s, scope);
         }
 
     }
@@ -182,6 +191,28 @@ export class SemanticAnalyzer {
         const condType = st.getCondExp().evaluateType(sc);
         if (condType !== TokenTypes.Boolean) {
             throw new Error(`SH11: If statement's condition type is ${condType} but boolean expected`);
+        }
+    }
+
+    public checkWhile(st: WhileStatement, sc: Scope) {
+        const condType = st.getCondExp().evaluateType(sc);
+        if (condType !== TokenTypes.Boolean) {
+            throw new Error(`SH12: While statement's condition type is ${condType} but boolean expected`);
+        }
+
+        // Check if it will not loop forever
+        const expressionIdentifiers = st.getCondExp().getIdentifiers();
+        let atLeastOneIdUsed = false;
+        for (const s of st.getLoopStm()) {
+            if (s instanceof AssignStatement
+                || s instanceof PostDecrementStatement || s instanceof PostIncrementStatement) {
+                if (expressionIdentifiers.find(e => e === s.getId().getValue())) {
+                    atLeastOneIdUsed = true;
+                }
+            }
+        }
+        if (!atLeastOneIdUsed) {
+            console.log(`SH13: Possible endless while loop`);
         }
     }
 

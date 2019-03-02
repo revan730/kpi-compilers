@@ -15,4 +15,8 @@ export class RuneLiteral implements Expression {
     public evaluateType(): string {
         return TokenTypes.Rune;
     }
+
+    public getIdentifiers(): string[] {
+        return [];
+    }
 }

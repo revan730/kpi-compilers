@@ -15,4 +15,8 @@ export class StringLiteral implements Expression {
     public evaluateType(): string {
         return TokenTypes.String;
     }
+
+    public getIdentifiers(): string[] {
+        return [];
+    }
 }

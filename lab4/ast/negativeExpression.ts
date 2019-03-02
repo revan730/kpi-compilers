@@ -22,4 +22,8 @@ export class NegativeExpression implements Expression {
 
         return TokenTypes.Integer;
     }
+
+    public getIdentifiers(): string[] {
+        return this.value.getIdentifiers();
+    }
 }

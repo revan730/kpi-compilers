@@ -10,7 +10,7 @@ export class WhileStatement implements Statement {
         this.loopStm = loopStm;
     }
 
-    public getCondExp(): Statement {
+    public getCondExp(): Expression {
 		return this.condExp;
 	}
 	

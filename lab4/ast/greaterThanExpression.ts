@@ -33,4 +33,10 @@ export class GreaterThanExpression implements Expression {
 
         return TokenTypes.Boolean; // Logic op
     }
+
+    public getIdentifiers(): string[] {
+        const lhsIdentifiers = this.lhs.getIdentifiers();
+        const rhsIdentifiers = this.rhs.getIdentifiers();
+        return lhsIdentifiers.concat(rhsIdentifiers);
+    }
 }

@@ -1,6 +1,7 @@
 import { Scope } from "../semantic";
 import { TokenTypes } from "../token";
 import { Expression } from "./expression";
+import { IdentifierExpression } from "./identifierExpression";
 
 export class AndExpression implements Expression {
     private lhs: Expression;
@@ -32,5 +33,11 @@ export class AndExpression implements Expression {
         }
 
         return TokenTypes.Boolean; // Logic op
+    }
+
+    public getIdentifiers(): string[] {
+        const lhsIdentifiers = this.lhs.getIdentifiers();
+        const rhsIdentifiers = this.rhs.getIdentifiers();
+        return lhsIdentifiers.concat(rhsIdentifiers);
     }
 }

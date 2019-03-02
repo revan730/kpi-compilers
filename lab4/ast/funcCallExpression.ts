@@ -21,4 +21,8 @@ export class FuncCallExpression implements Expression {
         // Expression type is function's return type
         return s.analyzer.findFunctionDeclaration(this.id, s).getReturnType();
     }
+
+    public getIdentifiers(): string[] {
+        return [this.id];
+    }
 }

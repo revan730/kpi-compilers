@@ -25,4 +25,8 @@ export class FieldAccessExpression implements Expression {
         const fieldType = this.rhs.getValue();
         return s.analyzer.findComplexFieldDeclaration(complexType, fieldType, s).getType();
     }
+
+    public getIdentifiers(): string[] {
+        return [this.lhs.getValue(), this.rhs.getValue()];
+    }
 }

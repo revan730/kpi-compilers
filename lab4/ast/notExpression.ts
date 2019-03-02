@@ -22,4 +22,8 @@ export class NotExpression implements Expression {
 
         return TokenTypes.Boolean; // Logic op
     }
+
+    public getIdentifiers(): string[] {
+        return this.getIdentifiers();
+    }
 }

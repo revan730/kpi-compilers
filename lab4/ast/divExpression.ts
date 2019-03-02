@@ -1,6 +1,7 @@
 import { Scope } from "../semantic";
 import { TokenTypes } from "../token";
 import { Expression } from "./expression";
+import { IdentifierExpression } from "./identifierExpression";
 
 export class DivExpression implements Expression {
     private lhs: Expression;
@@ -31,5 +32,11 @@ export class DivExpression implements Expression {
         }
 
         return lhsType; // Both are equal so whatever
+    }
+
+    public getIdentifiers(): string[] {
+        const lhsIdentifiers = this.lhs.getIdentifiers();
+        const rhsIdentifiers = this.rhs.getIdentifiers();
+        return lhsIdentifiers.concat(rhsIdentifiers);
     }
 }

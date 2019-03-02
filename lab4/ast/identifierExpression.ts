@@ -16,4 +16,8 @@ export class IdentifierExpression implements Expression {
         // Expression type is of variable with this id
         return s.analyzer.findVariableDeclaration(this.value, s).getType();
     }
+
+    public getIdentifiers(): string[] {
+        return [this.value];
+    }
 }

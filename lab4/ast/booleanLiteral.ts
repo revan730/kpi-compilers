@@ -15,4 +15,8 @@ export class BooleanLiteral implements Expression {
     public evaluateType(): string {
         return TokenTypes.Boolean;
     }
+
+    public getIdentifiers(): string[] {
+        return [];
+    }
 }

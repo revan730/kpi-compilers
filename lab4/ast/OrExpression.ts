@@ -33,4 +33,10 @@ export class OrExpression implements Expression {
 
         return TokenTypes.Boolean; // Boolean op
     }
+
+    public getIdentifiers(): string[] {
+        const lhsIdentifiers = this.lhs.getIdentifiers();
+        const rhsIdentifiers = this.rhs.getIdentifiers();
+        return lhsIdentifiers.concat(rhsIdentifiers);
+    }
 }
