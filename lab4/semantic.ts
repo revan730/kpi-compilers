@@ -65,6 +65,10 @@ export class SemanticAnalyzer {
             this.checkWhile(s, scope);
         }
 
+        if (s instanceof PostDecrementStatement || s instanceof PostIncrementStatement) {
+            this.checkPostOp(s, scope);
+        }
+
     }
 
     public analyzeFile() {
@@ -191,6 +195,17 @@ export class SemanticAnalyzer {
         const condType = st.getCondExp().evaluateType(sc);
         if (condType !== TokenTypes.Boolean) {
             throw new Error(`SH11: If statement's condition type is ${condType} but boolean expected`);
+        }
+    }
+
+    public checkPostOp(st: PostIncrementStatement | PostDecrementStatement, sc: Scope) {
+        const varId = st.getId().getValue();
+        const varDec = this.findVariableDeclaration(varId, sc);
+        if (!varDec) {
+            throw new Error(`SH13: Var ${varId} not found`);
+        }
+        if (varDec.getType() !== TokenTypes.Integer) {
+            throw new Error(`SH14: Post op called for ${varDec.getType()} but integer expected`);
         }
     }
 
