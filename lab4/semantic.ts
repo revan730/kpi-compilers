@@ -69,6 +69,10 @@ export class SemanticAnalyzer {
             this.checkPostOp(s, scope);
         }
 
+        if (s instanceof AssignStatement) {
+            this.checkAssign(s, scope);
+        }
+
     }
 
     public analyzeFile() {
@@ -206,6 +210,19 @@ export class SemanticAnalyzer {
         }
         if (varDec.getType() !== TokenTypes.Integer) {
             throw new Error(`SH14: Post op called for ${varDec.getType()} but integer expected`);
+        }
+    }
+
+    public checkAssign(st: AssignStatement, sc: Scope) {
+        const varId = st.getId().getValue();
+        const varDec = this.findVariableDeclaration(varId, sc);
+        const assignType = st.getValue().evaluateType(sc);
+
+        if (!varDec) {
+            throw new Error(`SH15: Trying to assign ${varId} but it's not declared`);
+        }
+        if (varDec.getType() !== assignType) {
+            throw new Error(`SH16: Trying to assign ${assignType} to ${varDec.getType()} variable`);
         }
     }
 
