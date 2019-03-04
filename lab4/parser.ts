@@ -691,7 +691,9 @@ export class Parser {
           lhs = new DivExpression(lhs, rhs);
           break;
         case TokenTypes.Dot:
-          lhs = new FieldAccessExpression(lhs, rhs);
+          const idLhs = lhs as IdentifierExpression;
+          const idRhs = rhs as IdentifierExpression;
+          lhs = new FieldAccessExpression(idLhs, idRhs);
           break;
         default:
           this.eatToken(TokenTypes.Unknown);

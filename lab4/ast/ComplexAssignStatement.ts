@@ -1,6 +1,6 @@
-import { Statement } from "./statement";
 import { Expression } from "./expression";
 import { Identifier } from "./identifier";
+import { Statement } from "./statement";
 
 export interface FieldAssignment {
     field: string;

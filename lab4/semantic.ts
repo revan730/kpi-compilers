@@ -15,6 +15,7 @@ import { AssignStatement } from "./ast/assignStatement";
 import { FuncCallStatement } from "./ast/funcCallStatement";
 import { PostDecrementStatement } from "./ast/postDecrement";
 import { PostIncrementStatement } from "./ast/postIncrement";
+import { AccessAssignStatement } from "./ast/accessAssignStatement";
 
 export interface Scope {
     statements: Statement[];
@@ -71,6 +72,10 @@ export class SemanticAnalyzer {
 
         if (s instanceof AssignStatement) {
             this.checkAssign(s, scope);
+        }
+
+        if (s instanceof AccessAssignStatement) {
+            this.checkAccessAssign(s, scope);
         }
 
     }
@@ -223,6 +228,23 @@ export class SemanticAnalyzer {
         }
         if (varDec.getType() !== assignType) {
             throw new Error(`SH16: Trying to assign ${assignType} to ${varDec.getType()} variable`);
+        }
+    }
+
+    public checkAccessAssign(st: AccessAssignStatement, sc: Scope) {
+        const varId = st.getComplexId();
+        const varDec = this.findVariableDeclaration(varId, sc);
+        const assignType = st.getValue().evaluateType(sc);
+        const fieldId = st.getFieldId();
+
+        if (!varDec) {
+            throw new Error(`SH17: Trying to assign complex var ${varId} but it's not declared`);
+        }
+
+        const fieldType = this.findComplexFieldDeclaration(varId, fieldId, sc).getType();
+
+        if (fieldType !== assignType) {
+            throw new Error(`SH18: Trying to assign ${assignType} to ${fieldType} field ${fieldId} of ${varId} var`);
         }
     }
 

@@ -5,7 +5,16 @@ export class Identifier implements Expression {
     constructor(value: string) {
         this.value = value;
     }
-    getValue = () => {
+
+    public evaluateType(s: import("../semantic").Scope): string {
+        throw new Error("Method not implemented.");
+    }
+
+    public getIdentifiers(): string[] {
+        throw new Error("Method not implemented.");
+    }
+
+    public getValue = () => {
         return this.value;
-    };
+    }
 }
