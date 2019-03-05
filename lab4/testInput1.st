@@ -33,8 +33,7 @@ command myFunc(void) {
     }
     var integer counter;
     while (counter < (a + 5)) {
-        printWhile(counter);
-        a = read(12, (1 + 2));
+        print(itoa(counter));
         counter++;
     }
 }

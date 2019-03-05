@@ -1,26 +1,25 @@
+import { AccessAssignStatement } from "./ast/accessAssignStatement";
+import { AssignStatement } from "./ast/assignStatement";
 import { ComplexField } from "./ast/complexField";
 import { ComplexType } from "./ast/complexType";
 import { Func } from "./ast/func";
-import { ReturnStatement } from "./ast/returnStatement";
-import { Statement } from "./ast/statement";
-import * as CharUtils from "./charUtils";
-import { Parser } from "./parser";
-import { FunctionParameter } from "./ast/functionParameter";
-import { IdentifierExpression } from "./ast/identifierExpression";
-import { VarDeclaration } from "./ast/varDeclaration";
-import { IfStatement } from "./ast/ifStatement";
-import { TokenTypes } from "./token";
-import { WhileStatement } from "./ast/whileStatement";
-import { AssignStatement } from "./ast/assignStatement";
 import { FuncCallStatement } from "./ast/funcCallStatement";
+import { FunctionParameter } from "./ast/functionParameter";
+import { IfStatement } from "./ast/ifStatement";
 import { PostDecrementStatement } from "./ast/postDecrement";
 import { PostIncrementStatement } from "./ast/postIncrement";
-import { AccessAssignStatement } from "./ast/accessAssignStatement";
+import { ReturnStatement } from "./ast/returnStatement";
+import { Statement } from "./ast/statement";
+import { VarDeclaration } from "./ast/varDeclaration";
+import { WhileStatement } from "./ast/whileStatement";
+import * as CharUtils from "./charUtils";
+import { Parser } from "./parser";
+import { exportFuncDeclarations } from "./stdlib";
+import { TokenTypes } from "./token";
 
 export interface Scope {
     statements: Statement[];
     assigns: any;
-    // TODO: Parent context
     returns: any;
     declarations: any;
     parentContext: any;
@@ -87,7 +86,7 @@ export class SemanticAnalyzer {
     public analyzeFile() {
         this.statements = this.parser.parseProgram();
         this.complexTypeDeclarations = [];
-        this.functionDeclarations = [];
+        this.functionDeclarations = exportFuncDeclarations();
         this.assigns = [];
         this.declarations = [];
         for (const s of this.statements) {
