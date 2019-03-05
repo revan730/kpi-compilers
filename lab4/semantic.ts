@@ -230,9 +230,9 @@ export class SemanticAnalyzer {
         if (st.hasFalseBlock()) {
             const falseBody = st.getFalseStmArr();
             const falseScope = {
+                assigns: [],
                 declarations: [],
                 returns: [],
-                assigns: [],
                 statements: [],
                 retType: sc.retType,
                 analyzer: this,
@@ -401,11 +401,9 @@ export class SemanticAnalyzer {
             parentContext: null,
         };
 
-
         for (const s of body) {
             this.analyze(s, bodyScope);
         }
-
 
         this.functionDeclarations.push(f);
     }
