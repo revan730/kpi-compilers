@@ -301,7 +301,7 @@ export class SemanticAnalyzer {
             throw new Error(`SH20: Func ${funcId} has ${funcParams.length} params, called with ${callParams.length}`);
         }
         // Check if parameter types match
-        for (let i = 0;i < funcParams.length;i++) {
+        for (let i = 0; i < funcParams.length; i++) {
             const expectedType = funcParams[i].getType();
             const actualType = callParams[i].evaluateType(sc);
             if (expectedType !== actualType) {
