@@ -78,6 +78,10 @@ export class SemanticAnalyzer {
             this.checkAccessAssign(s, scope);
         }
 
+        if (s instanceof FuncCallStatement) {
+            this.checkFuncCall(s, scope);
+        }
+
     }
 
     public analyzeFile() {
@@ -104,7 +108,7 @@ export class SemanticAnalyzer {
         // Traverse through scopes
         let currentScope = s;
         while(currentScope !== null) {
-            const varDec = s.declarations.find(d => d.getId() === id);
+            const varDec = currentScope.declarations.find(d => d.getId() === id);
             if (varDec) {
                 return varDec;
             }
@@ -202,8 +206,43 @@ export class SemanticAnalyzer {
 
     public checkIf(st: IfStatement, sc: Scope) {
         const condType = st.getCondExp().evaluateType(sc);
+        const trueBody = st.getTrueStmArr();
         if (condType !== TokenTypes.Boolean) {
             throw new Error(`SH11: If statement's condition type is ${condType} but boolean expected`);
+        }
+
+        // Descend into true branch body
+        const trueScope = {
+            declarations: [],
+            returns: [],
+            assigns: [],
+            statements: [],
+            retType: sc.retType,
+            analyzer: this,
+            parentContext: sc,
+        };
+
+        for (const s of trueBody) {
+            this.analyze(s, trueScope);
+        }
+
+        // Descend into false branch body
+
+        if (st.hasFalseBlock()) {
+            const falseBody = st.getFalseStmArr();
+            const falseScope = {
+                declarations: [],
+                returns: [],
+                assigns: [],
+                statements: [],
+                retType: sc.retType,
+                analyzer: this,
+                parentContext: sc,
+            };
+
+            for (const s of falseBody) {
+                this.analyze(s, falseScope);
+            }
         }
     }
 
@@ -248,8 +287,32 @@ export class SemanticAnalyzer {
         }
     }
 
+    public checkFuncCall(st: FuncCallStatement, sc: Scope) {
+        const funcId = st.getFuncId().getValue();
+        const funcDec = this.findFunctionDeclaration(funcId, sc);
+        const funcParams = funcDec.getParams();
+        const callParams = st.getParams();
+
+        if (!funcDec) {
+            throw new Error(`SH19: Trying to call func ${funcId} but it's not declared`);
+        }
+        // Check if parameter count match
+        if (funcParams.length !== callParams.length) {
+            throw new Error(`SH20: Func ${funcId} has ${funcParams.length} params, called with ${callParams.length}`);
+        }
+        // Check if parameter types match
+        for (let i = 0;i < funcParams.length;i++) {
+            const expectedType = funcParams[i].getType();
+            const actualType = callParams[i].evaluateType(sc);
+            if (expectedType !== actualType) {
+                throw new Error(`SH21: Param at index ${i + 1} expected to have type ${expectedType}, got ${actualType}`);
+            }
+        }
+    }
+
     public checkWhile(st: WhileStatement, sc: Scope) {
         const condType = st.getCondExp().evaluateType(sc);
+        const body = st.getLoopStm();
         if (condType !== TokenTypes.Boolean) {
             throw new Error(`SH12: While statement's condition type is ${condType} but boolean expected`);
         }
@@ -267,6 +330,21 @@ export class SemanticAnalyzer {
         }
         if (!atLeastOneIdUsed) {
             console.log(`SH13: Possible endless while loop`);
+        }
+
+        // Descend into body
+        const bodyScope = {
+            declarations: [],
+            returns: [],
+            assigns: [],
+            statements: [],
+            retType: sc.retType,
+            analyzer: this,
+            parentContext: sc,
+        };
+
+        for (const s of body) {
+            this.analyze(s, bodyScope);
         }
     }
 

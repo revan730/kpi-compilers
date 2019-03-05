@@ -1,5 +1,6 @@
 import { Statement } from "./statement";
 import { Expression } from "./expression";
+import { BlockStatement } from "./block";
 
 export class IfStatement implements Statement {
     private condExp: Expression;
@@ -18,9 +19,23 @@ export class IfStatement implements Statement {
 	
 	public getTrueStm(): Statement {
 		return this.trueStm;
-	}
-	
+  }
+  
+  public getTrueStmArr(): Statement[] {
+    const block = this.trueStm as BlockStatement;
+    return block.getStatementsList();
+  }
+  
 	public getFalseStm(): Statement {
 		return this.falseStm;
-    }
+  }
+
+  public getFalseStmArr(): Statement[] {
+    const block = this.falseStm as BlockStatement;
+    return block.getStatementsList();
+  }
+
+  public hasFalseBlock(): boolean {
+    return !!this.falseStm;
+  }
 }

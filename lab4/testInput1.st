@@ -3,7 +3,7 @@ complex myType {
     integer b;
 }
 
-func boolean myBoolFunc(void) {
+func boolean myBoolFunc(boolean myParam) {
     func boolean nestedFunc(void) {return true;}
     return nestedFunc();
 }
@@ -22,7 +22,7 @@ command myFunc(void) {
     a = 10;
     a++;
     a--;
-    b = myBoolFunc();
+    b = myBoolFunc(true);
     b = true;
     c.a = "wow";
     c.b = 228;
@@ -33,7 +33,7 @@ command myFunc(void) {
     }
     var integer counter;
     while (counter < (a + 5)) {
-        print(counter);
+        printWhile(counter);
         a = read(12, (1 + 2));
         counter++;
     }
