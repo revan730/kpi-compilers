@@ -1,0 +1,157 @@
+[ ComplexType {
+    id: 'myType',
+    fields:
+     [ ComplexField { type: 'string', id: 'a' },
+       ComplexField { type: 'integer', id: 'b' } ] },
+  Func {
+    id: 'myBoolFunc',
+    params: [ FunctionParameter { type: 'boolean', id: 'myParam' } ],
+    body:
+     BlockStatement {
+       statementList:
+        [ Func {
+            id: 'nestedFunc',
+            params: [],
+            body:
+             BlockStatement {
+               statementList:
+                [ ReturnStatement { value: BooleanLiteral { getValue: [Function], value: true } } ] },
+            returnType: 'boolean',
+            native: undefined },
+          ReturnStatement {
+            value:
+             FuncCallExpression {
+               getId: [Function],
+               getParams: [Function],
+               id: 'nestedFunc',
+               params: [] } } ] },
+    returnType: 'boolean',
+    native: undefined },
+  Func {
+    id: 'myFunc',
+    params: [],
+    body:
+     BlockStatement {
+       statementList:
+        [ VarDeclaration { type: 'integer', identifier: 'a' },
+          VarDeclaration { type: 'boolean', identifier: 'b' },
+          VarDeclaration { type: 'rune', identifier: 'r' },
+          AssignStatement {
+            id: Identifier { getValue: [Function], value: 'r' },
+            value: RuneLiteral { getValue: [Function], value: "'a'" } },
+          VarDeclaration { type: 'myType', identifier: 'c' },
+          VarDeclaration { type: 'user', identifier: 'Revan730' },
+          ComplexAssignStatement {
+            id: Identifier { getValue: [Function], value: 'Revan730' },
+            values:
+             [ { field: 'hookSecret',
+                 assignment: StringLiteral { getValue: [Function], value: '"secret"' } },
+               { field: 'accessToken',
+                 assignment: StringLiteral { getValue: [Function], value: '"token"' } } ] },
+          AssignStatement {
+            id: Identifier { getValue: [Function], value: 'a' },
+            value: IntegerLiteral { getValue: [Function], value: 10 } },
+          PostIncrementStatement { id: Identifier { getValue: [Function], value: 'a' } },
+          PostDecrementStatement { id: Identifier { getValue: [Function], value: 'a' } },
+          AssignStatement {
+            id: Identifier { getValue: [Function], value: 'b' },
+            value:
+             FuncCallExpression {
+               getId: [Function],
+               getParams: [Function],
+               id: 'myBoolFunc',
+               params: [ BooleanLiteral { getValue: [Function], value: true } ] } },
+          AssignStatement {
+            id: Identifier { getValue: [Function], value: 'b' },
+            value: BooleanLiteral { getValue: [Function], value: true } },
+          AccessAssignStatement {
+            complexVar: 'c',
+            field: 'a',
+            assignment: StringLiteral { getValue: [Function], value: '"wow"' } },
+          AccessAssignStatement {
+            complexVar: 'c',
+            field: 'b',
+            assignment: IntegerLiteral { getValue: [Function], value: 228 } },
+          IfStatement {
+            condExp:
+             AndExpression {
+               getLHS: [Function],
+               getRHS: [Function],
+               lhs:
+                OrExpression {
+                  getLHS: [Function],
+                  getRHS: [Function],
+                  lhs:
+                   OrExpression {
+                     getLHS: [Function],
+                     getRHS: [Function],
+                     lhs:
+                      NotEqualExpression {
+                        getLHS: [Function],
+                        getRHS: [Function],
+                        lhs: IdentifierExpression { getValue: [Function], value: 'a' },
+                        rhs: IdentifierExpression { getValue: [Function], value: 'a' } },
+                     rhs:
+                      GreaterThanEqualExpression {
+                        getLHS: [Function],
+                        getRHS: [Function],
+                        lhs:
+                         FieldAccessExpression {
+                           getLHS: [Function],
+                           getRHS: [Function],
+                           lhs: IdentifierExpression { getValue: [Function], value: 'c' },
+                           rhs: IdentifierExpression { getValue: [Function], value: 'b' } },
+                        rhs: IdentifierExpression { getValue: [Function], value: 'a' } } },
+                  rhs:
+                   EqualExpression {
+                     getLHS: [Function],
+                     getRHS: [Function],
+                     lhs: IdentifierExpression { getValue: [Function], value: 'b' },
+                     rhs: IdentifierExpression { getValue: [Function], value: 'b' } } },
+               rhs:
+                LessThanExpression {
+                  getLHS: [Function],
+                  getRHS: [Function],
+                  lhs: IdentifierExpression { getValue: [Function], value: 'a' },
+                  rhs: IdentifierExpression { getValue: [Function], value: 'a' } } },
+            trueStm:
+             BlockStatement { statementList: [ ReturnStatement { value: null } ] },
+            falseStm:
+             BlockStatement {
+               statementList:
+                [ AssignStatement {
+                    id: Identifier { getValue: [Function], value: 'b' },
+                    value:
+                     NotExpression {
+                       getValue: [Function],
+                       value: IdentifierExpression { getValue: [Function], value: 'b' } } } ] } },
+          VarDeclaration { type: 'integer', identifier: 'counter' },
+          WhileStatement {
+            condExp:
+             LessThanExpression {
+               getLHS: [Function],
+               getRHS: [Function],
+               lhs:
+                IdentifierExpression { getValue: [Function], value: 'counter' },
+               rhs:
+                PlusExpression {
+                  getLHS: [Function],
+                  getRHS: [Function],
+                  lhs: IdentifierExpression { getValue: [Function], value: 'a' },
+                  rhs: IntegerLiteral { getValue: [Function], value: 5 } } },
+            loopStm:
+             [ FuncCallStatement {
+                 funcId: Identifier { getValue: [Function], value: 'print' },
+                 params:
+                  [ FuncCallExpression {
+                      getId: [Function],
+                      getParams: [Function],
+                      id: 'itoa',
+                      params:
+                       [ IdentifierExpression { getValue: [Function], value: 'counter' } ] } ] },
+               PostIncrementStatement { id: Identifier { getValue: [Function], value: 'counter' } } ] } ] },
+    returnType: null,
+    native: undefined },
+  FuncCallStatement {
+    funcId: Identifier { getValue: [Function], value: 'myFunc' },
+    params: [] } ]
