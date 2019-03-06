@@ -1,7 +1,7 @@
 import { Statement } from "./ast/statement";
 import { SemanticAnalyzer } from "./semantic";
 import { ComplexType } from "./ast/complexType";
-import { exportFuncDeclarations } from "./stdlib";
+import { exportFuncDeclarations, exportComplexTypeDeclarations } from "./stdlib";
 import { Func } from "./ast/func";
 import { ReturnStatement } from "./ast/returnStatement";
 import { InterpreterScope } from "./interpreterScope";
@@ -11,6 +11,7 @@ import { IfStatement } from "./ast/ifStatement";
 import { WhileStatement } from "./ast/whileStatement";
 import { AssignStatement } from "./ast/assignStatement";
 import { FuncCallStatement } from "./ast/funcCallStatement";
+import { ComplexAssignStatement } from "./ast/ComplexAssignStatement";
 
 export class Interpreter {
     private ast: Statement[];
@@ -23,7 +24,7 @@ export class Interpreter {
         this.semanticAnalyzer = new SemanticAnalyzer(input);
         this.semanticAnalyzer.analyzeFile();
         this.ast = this.semanticAnalyzer.getAst();
-        this.complexTypeDeclarations = [];
+        this.complexTypeDeclarations = exportComplexTypeDeclarations();
         // TODO: Load reserved complex types
         this.declarations = [];
         this.functionDeclarations = exportFuncDeclarations();
@@ -64,6 +65,10 @@ export class Interpreter {
             this.interpretAssign(s, scope);
         }
 
+        if (s instanceof ComplexAssignStatement) {
+            this.interpretComplexAssign(s, scope);
+        }
+
         /*if (s instanceof AccessAssignStatement) {
             this.checkAccessAssign(s, scope);
         }*/
@@ -78,6 +83,7 @@ export class Interpreter {
         for (const s of this.ast) {
             this.interpret(s, null);
         }
+        console.dir(this.declarations);
     }
 
     public getVar(id: string, s: InterpreterScope) {
@@ -180,5 +186,21 @@ export class Interpreter {
             value = s.getValue().evaluateValue({ interpreter: this, declarations: this.declarations });
         }
         varDec.setValue(value);
+    }
+
+    public interpretComplexAssign(s: ComplexAssignStatement, scope: InterpreterScope) {
+        const varId = s.getId().getValue();
+        const varDec = this.getVar(varId, scope);
+        const objectValue = {};
+        for (const a of s.getValues()) {
+            let value = null;
+            if (scope) {
+                value = a.assignment.evaluateValue(scope);
+            } else {
+                value = a.assignment.evaluateValue({ interpreter: this, declarations: this.declarations });
+            }
+            objectValue[a.field] = value;
+        }
+        varDec.setValue(objectValue);
     }
 }

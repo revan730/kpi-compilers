@@ -31,7 +31,7 @@ export class FieldAccessExpression implements Expression {
         const complexId = this.lhs.getValue();
         const fieldId = this.rhs.getValue();
         const complexObject = s.interpreter.getVar(complexId, s).getValue();
-        return complexObject.fieldId;
+        return complexObject[fieldId];
     }
 
     public getIdentifiers(): string[] {
