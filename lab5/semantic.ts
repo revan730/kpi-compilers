@@ -14,8 +14,9 @@ import { VarDeclaration } from "./ast/varDeclaration";
 import { WhileStatement } from "./ast/whileStatement";
 import * as CharUtils from "./charUtils";
 import { Parser } from "./parser";
-import { exportFuncDeclarations } from "./stdlib";
+import { exportFuncDeclarations, exportComplexTypeDeclarations } from "./stdlib";
 import { TokenTypes } from "./token";
+import { ComplexAssignStatement } from "./ast/ComplexAssignStatement";
 
 export interface Scope {
     statements?: Statement[];
@@ -73,6 +74,10 @@ export class SemanticAnalyzer {
             this.checkAssign(s, scope);
         }
 
+        if (s instanceof ComplexAssignStatement) {
+            this.checkComplexAssign(s, scope);
+        }
+
         if (s instanceof AccessAssignStatement) {
             this.checkAccessAssign(s, scope);
         }
@@ -89,7 +94,7 @@ export class SemanticAnalyzer {
 
     public analyzeFile() {
         this.statements = this.parser.parseProgram();
-        this.complexTypeDeclarations = [];
+        this.complexTypeDeclarations = exportComplexTypeDeclarations();
         this.functionDeclarations = exportFuncDeclarations();
         this.assigns = [];
         this.declarations = [];
@@ -131,7 +136,7 @@ export class SemanticAnalyzer {
         }
         const complexType = this.complexTypeDeclarations.find((ct: ComplexType) => ct.getId() === complex.getType());
         if (!complexType) {
-            throw new Error(`SH??: Complex type '${complex.getId()}' not declared`);
+            throw new Error(`SH??: Complex type '${complex.getType()}' not declared`);
         }
         const field = complexType.getFields().find((f: ComplexField) => f.getId() === fieldId);
         if (!field) {
@@ -175,6 +180,19 @@ export class SemanticAnalyzer {
 
         this.checkComplexTypeFields(id, fields);
         this.complexTypeDeclarations.push(c);
+    }
+
+    public checkComplexAssign(s: ComplexAssignStatement, scope: Scope) {
+        const id = s.getId().getValue();
+        const fieldAssignments = s.getValues();
+        for (const a of fieldAssignments) {
+            const fieldDec = this.findComplexFieldDeclaration(id, a.field, scope);
+            const assignType = a.assignment.evaluateType(scope);
+            const fieldType = fieldDec.getType();
+            if (fieldType !== a.assignment.evaluateType(scope)) {
+                throw new Error(`SH18: Trying to assign ${assignType} to ${fieldType} field ${a.field} of ${id} var`);
+            }
+        }
     }
 
     public checkReturn(r: ReturnStatement, scope: Scope, funcType: string) {
