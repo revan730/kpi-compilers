@@ -47,11 +47,11 @@ export class Interpreter {
             this.declareVar(s, scope);
         }
 
-        // TODO
+        if (s instanceof IfStatement) {
+            return this.interpretIf(s, scope);
+        }
 
-        /*if (s instanceof IfStatement) {
-            this.interpretIf()
-        }*/
+        // TODO
 
         /*if (s instanceof WhileStatement) {
             this.interpretWhile();
@@ -169,6 +169,46 @@ export class Interpreter {
             const val = this.interpret(st, bodyScope);
             if (val) {
                 returnValue = val;
+                return returnValue;
+            }
+        }
+    }
+
+    public interpretIf(i: IfStatement, scope: InterpreterScope) {
+        if (!scope) {
+            scope = { interpreter: this, declarations: this.declarations };
+        }
+        const conditionValue = i.getCondExp().evaluateValue(scope);
+        const ifScope = {
+            declarations: [],
+            returns: [],
+            assigns: [],
+            statements: [],
+            retType: scope.retType,
+            interpreter: this,
+            parentContext: scope,
+        };
+
+        let returnValue = null;
+        if (conditionValue) {
+            // go into true block
+            for (const st of i.getTrueStmArr()) {
+                const val = this.interpret(st, ifScope);
+                if (val) {
+                    returnValue = val;
+                    return returnValue;
+                }
+            }
+        } else {
+            if (i.hasFalseBlock()) {
+                // go into false block
+                for (const st of i.getTrueStmArr()) {
+                    const val = this.interpret(st, ifScope);
+                    if (val) {
+                        returnValue = val;
+                        return returnValue;
+                    }
+                }
             }
         }
 

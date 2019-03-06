@@ -4,6 +4,9 @@ complex myType {
 }
 
 func integer myIntFunc(integer myParam) {
+    if (myParam > 10) {
+        return 100;
+    }
     return myParam;
 }
 

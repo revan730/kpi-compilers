@@ -46,10 +46,7 @@ import { FuncCallExpression } from "./ast/funcCallExpression";
 
 export class Parser {
   private binopLevels: any;
-  private declarations: any;
   private identifiers: any;
-  private assigns: any;
-  private conditions: any;
   private statements: any;
   private complexTypes: any;
   private functions: any;
@@ -80,10 +77,7 @@ export class Parser {
   constructor(input: string) {
     this.initBinopLevels();
     this.lexer = new Lexer(input);
-    this.declarations = [];
     this.identifiers = [];
-    this.assigns = [];
-    this.conditions = [];
     this.complexTypes = [];
     this.functions = [];
     this.tokens = this.lexer.allTokens();
@@ -385,7 +379,6 @@ export class Parser {
         this.skipTo([TokenTypes.Rparent, TokenTypes.Lbrace, TokenTypes.Rbrace]);
 
       const condExp = this.parseExp();
-      this.conditions.push(condExp);
 
       if (!this.eatToken(TokenTypes.Rparent))
         this.skipTo([TokenTypes.Lbrace, TokenTypes.Semi, TokenTypes.Rbrace]);
@@ -425,7 +418,6 @@ export class Parser {
         this.skipTo([TokenTypes.Rparent, TokenTypes.Lbrace, TokenTypes.Rbrace]);
 
       const condExp = this.parseExp();
-      this.conditions.push(condExp);
 
       if (!this.eatToken(TokenTypes.Rparent))
         this.skipTo([TokenTypes.Lbrace, TokenTypes.Semi, TokenTypes.Rbrace]);
@@ -477,7 +469,6 @@ export class Parser {
         this.eatToken(TokenTypes.Semi);
 
         const assign = new AssignStatement(id, value);
-        this.assigns.push(assign);
         return assign;
       }
 

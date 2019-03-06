@@ -1,6 +1,6 @@
-import { Token, TokenTypes } from './token';
 import * as CharUtils from './charUtils';
 import { NumberFSM } from './numberFSM';
+import { Token, TokenTypes } from './token';
 
 export class Lexer {
     private input: string;
@@ -21,7 +21,7 @@ export class Lexer {
         if (input[input.length - 1] === LF) {
             input = input.slice(0, input.length - 1);
         }
-    
+
         if (input[input.length - 1] === CR) {
             input = input.slice(0, input.length - 1);
         }
@@ -48,13 +48,13 @@ export class Lexer {
         }
 
         this.skipWhitespacesAndNewLines();
-        
+
         const character = this.input.charAt(this.position);
-        
+
         if (CharUtils.isLetter(character)) {
             return this.recognizeIdentifier();
         }
-        
+
         if (CharUtils.isDigit(character)) {
             return this.recognizeNumber();
         }
@@ -62,15 +62,15 @@ export class Lexer {
         if (character === '"') {
             return this.recognizeString();
         }
-        
+
         if (character === "'") {
             return this.recognizeRune();
         }
-        
+
         if (CharUtils.isOperator(character)) {
             return this.recognizeOperator();
         }
-        
+
         if (CharUtils.isParenthesis(character)) {
             return this.recognizeParenthesis();
         }
@@ -86,7 +86,7 @@ export class Lexer {
         throw new Error(`Unrecognized character ${character.charCodeAt(0)} at line ${this.line} and column ${this.column}.`);
     }
 
-    skipWhitespacesAndNewLines() {
+    private skipWhitespacesAndNewLines() {
         while (this.position < this.input.length && CharUtils.isWhitespaceOrNewLine(this.input.charAt(this.position))) {
            if (CharUtils.isNewLine(this.input.charAt(this.position))) {
                this.line += 1;
@@ -104,14 +104,14 @@ export class Lexer {
         let column = this.column;
         let character = this.input.charAt(position);
 
-        
+
         this.position += 1;
         this.column += 1;
-        
+
         if (character === '(') {
             return new Token(TokenTypes.Lparent, '(', line, column);
         }
-        
+
         return new Token(TokenTypes.Rparent, ')', line, column);
     }
 
@@ -121,15 +121,15 @@ export class Lexer {
         let column = this.column;
         let character = this.input.charAt(position);
 
-        
+
         this.position += 1;
         this.column += 1;
-        
+
         if (character === ';') {
             return new Token(TokenTypes.Semi, ';', line, column);
         }
-        
-        return new Token(TokenTypes.Comma, ',', line, column);   
+
+        return new Token(TokenTypes.Comma, ',', line, column);
     }
 
     private recognizeBracket(): Token {
@@ -138,24 +138,24 @@ export class Lexer {
         let column = this.column;
         let character = this.input.charAt(position);
 
-        
+
         this.position += 1;
         this.column += 1;
-        
+
         if (character === '{') {
             return new Token(TokenTypes.Lbrace, '{', line, column);
         }
-        
+
         return new Token(TokenTypes.Rbrace, '}', line, column);
     }
 
     private recognizeOperator() {
         let character = this.input.charAt(this.position);
-        
+
         if (CharUtils.isComparisonOperator(character)) {
             return this.recognizeComparisonOperator();
         }
-        
+
         if (CharUtils.isArithmeticOperator(character)) {
             return this.recognizeArithmeticOperator();
         }
@@ -163,8 +163,6 @@ export class Lexer {
         if (CharUtils.isLogicalOperator(character)) {
             return this.recognizeLogicalOperator();
         }
-        
-        // ...
     }
 
     private recognizeLogicalOperator() {
@@ -172,72 +170,70 @@ export class Lexer {
         let line = this.line;
         let column = this.column;
         let character = this.input.charAt(position);
-        
+
         // 'lookahead' is the next character in the input
         // or 'null' if 'character' was the last character.
         let lookahead = position + 1 < this.input.length ? this.input.charAt(position + 1) : null;
-        
+
         let isLookaheadAmpSymbol = lookahead !== null && lookahead === '&';
         let isLookaheadPipeSymbol = lookahead !== null && lookahead === '|';
-     
+
         this.position += 1;
         this.column += 1;
-        
+
         if (isLookaheadAmpSymbol || isLookaheadPipeSymbol) {
             this.position += 1;
             this.column += 1;
         }
-        
+
         switch (character) {
             case '&':
                 return isLookaheadAmpSymbol
                     ? new Token(TokenTypes.And, '&&', line, column)
                     : new Token(TokenTypes.Amp, '&', line, column);
-                
+
             case '|':
                 return isLookaheadPipeSymbol
                     ? new Token(TokenTypes.Or, '||', line, column)
                     : new Token(TokenTypes.Unknown, character + lookahead, line, column);
-                
+
             default:
                 break;
         }
-        
-        // ...
     }
-    
+
     private recognizeComparisonOperator() {
         let position = this.position;
         let line = this.line;
         let column = this.column;
         let character = this.input.charAt(position);
-        
+
         // 'lookahead' is the next character in the input
         // or 'null' if 'character' was the last character.
         let lookahead = position + 1 < this.input.length ? this.input.charAt(position + 1) : null;
-        
+
         // Whether the 'lookahead' character is the equal symbol '='.
         let isLookaheadEqualSymbol = lookahead !== null && lookahead === '=';
-     
+
         this.position += 1;
         this.column += 1;
-        
+
         if (isLookaheadEqualSymbol) {
             this.position += 1;
             this.column += 1;
         }
-        
+
         switch (character) {
             case '>':
                 return isLookaheadEqualSymbol
                     ? new Token(TokenTypes.RtEq, '>=', line, column)
                     : new Token(TokenTypes.Rt, '>', line, column);
-                
+
             case '<':
                 return isLookaheadEqualSymbol
                     ? new Token(TokenTypes.LtEq, '<=', line, column)
                     : new Token(TokenTypes.Lt, '<', line, column);
-                
+
             case '=':
                 return isLookaheadEqualSymbol
                     ? new Token(TokenTypes.Eq, '==', line, column)
@@ -247,12 +243,10 @@ export class Lexer {
                 return isLookaheadEqualSymbol
                     ? new Token(TokenTypes.Neq, '!=', line, column)
                     : new Token(TokenTypes.Not, '!', line, column);
-                
+
             default:
                 break;
         }
-        
-        // ...
     }
     
     private recognizeArithmeticOperator() {
@@ -302,7 +296,7 @@ export class Lexer {
         }
     }
     
-    recognizeIdentifier() {
+    private recognizeIdentifier() {
         let identifier = '';
         let line = this.line;
         let column = this.column;
@@ -359,7 +353,7 @@ export class Lexer {
         // ...
     }
 
-    recognizeString(): Token {
+    private recognizeString(): Token {
         let line = this.line;
         let column = this.column;
         const results = /"(\\.|[^"\\])*\"/.exec(this.input.substring(this.position));
@@ -371,7 +365,7 @@ export class Lexer {
         return new Token(TokenTypes.StringLiteral, results[0].replace(/["]+/g, ''), line, column);
     }
 
-    recognizeRune(): Token {
+    private recognizeRune(): Token {
         let line = this.line;
         let column = this.column;
         const results = /^'\w'/.exec(this.input.substring(this.position));
