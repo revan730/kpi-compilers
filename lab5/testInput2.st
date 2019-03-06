@@ -8,6 +8,6 @@ func integer myIntFunc(integer myParam) {
 }
 
 var integer myInt;
-myInt = myIntFunc(12);
+myInt = myIntFunc(12 + 12);
 print(itoa(myInt));
 print("calling from Shanty");

@@ -24,7 +24,7 @@ command myFunc(void) {
     a--;
     b = myBoolFunc(true);
     b = true;
-    c.a = "wow";
+    c.a = "wow such string";
     c.b = 228;
     if (a != a || c.b >= a || b == b && a < a) {
         return;
