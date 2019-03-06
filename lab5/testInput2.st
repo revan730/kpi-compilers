@@ -23,3 +23,4 @@ print(itoa(myInt));
 print("calling from Shanty");
 print("accessing complex type var field");
 print(myTypeVar.a);
+print("it works omg i'm so hyped");

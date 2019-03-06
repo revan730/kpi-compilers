@@ -368,7 +368,7 @@ export class Lexer {
         }
         this.position += results[0].length;
         this.column += results[0].length;
-        return new Token(TokenTypes.StringLiteral, results[0].replace(/['"]+/g, ''), line, column); 
+        return new Token(TokenTypes.StringLiteral, results[0].replace(/["]+/g, ''), line, column);
     }
 
     recognizeRune(): Token {

@@ -83,7 +83,6 @@ export class Interpreter {
         for (const s of this.ast) {
             this.interpret(s, null);
         }
-        console.dir(this.declarations);
     }
 
     public getVar(id: string, s: InterpreterScope) {
