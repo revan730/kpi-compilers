@@ -22,6 +22,9 @@ export class ReturnStatement implements Statement {
     }
 
     public evaluateValue(s: InterpreterScope): any {
+        if (!this.value) {
+            return "NIL";
+        }
         return this.value.evaluateValue(s);
     }
 }

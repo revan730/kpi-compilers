@@ -10,6 +10,15 @@ func integer myIntFunc(integer myParam) {
     return myParam;
 }
 
+command printWithWhile(void) {
+    var integer counter;
+    counter = 0;
+    while (counter < 5) {
+        print(itoa(counter));
+        counter = counter + 1;
+    }
+}
+
 var integer myInt;
 var complex myType myTypeVar;
 var user Revan730;
@@ -27,3 +36,6 @@ print("calling from Shanty");
 print("accessing complex type var field");
 print(myTypeVar.a);
 print("it works omg i'm so hyped");
+
+printWithWhile();
+print("this print should be after function call");

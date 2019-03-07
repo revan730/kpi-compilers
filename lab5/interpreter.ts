@@ -51,11 +51,11 @@ export class Interpreter {
             return this.interpretIf(s, scope);
         }
 
-        // TODO
+        if (s instanceof WhileStatement) {
+            return this.interpretWhile(s, scope);
+        }
 
-        /*if (s instanceof WhileStatement) {
-            this.interpretWhile();
-        }*/
+        // TODO
 
         /*if (s instanceof PostDecrementStatement || s instanceof PostIncrementStatement) {
             this.checkPostOp(s, scope);
@@ -210,6 +210,36 @@ export class Interpreter {
                     }
                 }
             }
+        }
+
+        return returnValue;
+    }
+
+    public interpretWhile(w: WhileStatement, scope: InterpreterScope) {
+        if (!scope) {
+            scope = { interpreter: this, declarations: this.declarations };
+        }
+        let conditionValue = w.getCondExp().evaluateValue(scope);
+        const ifScope = {
+            declarations: [],
+            returns: [],
+            assigns: [],
+            statements: [],
+            retType: scope.retType,
+            interpreter: this,
+            parentContext: scope,
+        };
+
+        let returnValue = null;
+        while (conditionValue) {
+            for (const st of w.getLoopStm()) {
+                const val = this.interpret(st, ifScope);
+                if (val) {
+                    returnValue = val;
+                    return returnValue;
+                }
+            }
+            conditionValue = w.getCondExp().evaluateValue(scope);
         }
 
         return returnValue;
