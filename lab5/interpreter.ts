@@ -12,6 +12,8 @@ import { WhileStatement } from "./ast/whileStatement";
 import { AssignStatement } from "./ast/assignStatement";
 import { FuncCallStatement } from "./ast/funcCallStatement";
 import { ComplexAssignStatement } from "./ast/ComplexAssignStatement";
+import { PostDecrementStatement } from "./ast/postDecrement";
+import { PostIncrementStatement } from "./ast/postIncrement";
 
 export class Interpreter {
     private ast: Statement[];
@@ -55,11 +57,9 @@ export class Interpreter {
             return this.interpretWhile(s, scope);
         }
 
-        // TODO
-
-        /*if (s instanceof PostDecrementStatement || s instanceof PostIncrementStatement) {
-            this.checkPostOp(s, scope);
-        }*/
+        if (s instanceof PostDecrementStatement || s instanceof PostIncrementStatement) {
+            this.interpretPostOp(s, scope);
+        }
 
         if (s instanceof AssignStatement) {
             this.interpretAssign(s, scope);
@@ -68,6 +68,8 @@ export class Interpreter {
         if (s instanceof ComplexAssignStatement) {
             this.interpretComplexAssign(s, scope);
         }
+
+        // TODO
 
         /*if (s instanceof AccessAssignStatement) {
             this.checkAccessAssign(s, scope);
@@ -243,6 +245,17 @@ export class Interpreter {
         }
 
         return returnValue;
+    }
+
+    public interpretPostOp(s: PostDecrementStatement | PostIncrementStatement, scope: InterpreterScope) {
+        const varId = s.getId().getValue();
+        const varDec = this.getVar(varId, scope);
+        const value = varDec.getValue();
+        if (s instanceof PostIncrementStatement) {
+            varDec.setValue(value + 1);
+        } else {
+            varDec.setValue(value - 1);
+        }
     }
 
     public interpretAssign(s: AssignStatement, scope: InterpreterScope) {

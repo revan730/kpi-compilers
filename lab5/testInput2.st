@@ -39,3 +39,5 @@ print("it works omg i'm so hyped");
 
 printWithWhile();
 print("this print should be after function call");
+myInt++;
+print(itoa(myInt));
