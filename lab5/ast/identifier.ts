@@ -1,4 +1,6 @@
 import { Expression } from "./expression";
+import { InterpreterScope } from "../interpreterScope";
+import { Scope } from "../semantic";
 
 export class Identifier implements Expression {
     private value: string;
@@ -6,11 +8,11 @@ export class Identifier implements Expression {
         this.value = value;
     }
 
-    public evaluateValue(s: import("../interpreterScope").InterpreterScope) {
+    public evaluateValue(s: InterpreterScope): any {
         throw new Error("Method not implemented.");
     }
 
-    public evaluateType(s: import("../semantic").Scope): string {
+    public evaluateType(s: Scope): string {
         throw new Error("Method not implemented.");
     }
 
