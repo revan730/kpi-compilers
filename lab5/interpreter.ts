@@ -168,7 +168,7 @@ export class Interpreter {
         let returnValue = null;
         for (const st of f.getBody().getStatementsList()) {
             const val = this.interpret(st, bodyScope);
-            if (val) {
+            if (typeof val !== 'undefined') {
                 returnValue = val;
                 return returnValue;
             }

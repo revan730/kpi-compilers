@@ -178,6 +178,9 @@ export class SemanticAnalyzer {
     }
 
     public checkComplexAssign(s: ComplexAssignStatement, scope: Scope) {
+        if (!scope) {
+            scope = { analyzer: this, declarations: this.declarations };
+        }
         const id = s.getId().getValue();
         const fieldAssignments = s.getValues();
         for (const a of fieldAssignments) {
@@ -271,6 +274,9 @@ export class SemanticAnalyzer {
     }
 
     public checkAssign(st: AssignStatement, sc: Scope) {
+        if (!sc) {
+            sc = { analyzer: this, declarations: this.declarations };
+        }
         const varId = st.getId().getValue();
         const varDec = this.findVariableDeclaration(varId, sc);
         let assignType = null;

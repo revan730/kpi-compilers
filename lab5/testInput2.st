@@ -57,3 +57,14 @@ while (counter < 5) {
 if (true) {
     print("true from file scope if");
 }
+
+var repo ClipperFront;
+ClipperFront = {
+    owner = Revan730;
+    url = "httpsgithub.com/revan730/clipper-front";
+    branch = "dev";
+}
+
+var boolean validRepo;
+validRepo = validateRepo(ClipperFront);
+print(strConcat("Repo valid: ", btoa(validRepo)));
