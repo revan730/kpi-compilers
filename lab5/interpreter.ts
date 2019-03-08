@@ -14,6 +14,7 @@ import { FuncCallStatement } from "./ast/funcCallStatement";
 import { ComplexAssignStatement } from "./ast/ComplexAssignStatement";
 import { PostDecrementStatement } from "./ast/postDecrement";
 import { PostIncrementStatement } from "./ast/postIncrement";
+import { AccessAssignStatement } from "./ast/accessAssignStatement";
 
 export class Interpreter {
     private ast: Statement[];
@@ -69,11 +70,9 @@ export class Interpreter {
             this.interpretComplexAssign(s, scope);
         }
 
-        // TODO
-
-        /*if (s instanceof AccessAssignStatement) {
-            this.checkAccessAssign(s, scope);
-        }*/
+        if (s instanceof AccessAssignStatement) {
+            this.interpretAccessAssign(s, scope);
+        }
 
         if (s instanceof FuncCallStatement) {
             this.interpretFuncCall(s, scope);
@@ -284,5 +283,13 @@ export class Interpreter {
             objectValue[a.field] = value;
         }
         varDec.setValue(objectValue);
+    }
+
+    public interpretAccessAssign(s: AccessAssignStatement, sc: InterpreterScope) {
+        const varId = s.getComplexId();
+        const varDec = this.getVar(varId, sc);
+        const fieldId = s.getFieldId();
+        const objectValue = varDec.getValue();
+        objectValue[fieldId] = s.getValue().evaluateValue(sc);
     }
 }

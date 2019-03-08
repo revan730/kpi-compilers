@@ -33,6 +33,7 @@ myTypeVar = {
 }
 print(itoa(myInt));
 print("calling from Shanty");
+myTypeVar.a = "changed a value";
 print("accessing complex type var field");
 print(myTypeVar.a);
 print("it works omg i'm so hyped");
@@ -41,3 +42,14 @@ printWithWhile();
 print("this print should be after function call");
 myInt++;
 print(itoa(myInt));
+
+print("accessing user type accessToken");
+print(Revan730.accessToken);
+
+var integer counter;
+counter = 3;
+
+while (counter < 5) {
+        print(itoa(counter));
+        counter = counter + 1;
+}
