@@ -19,9 +19,6 @@ import { TokenTypes } from "./token";
 import { ComplexAssignStatement } from "./ast/ComplexAssignStatement";
 
 export interface Scope {
-    statements?: Statement[];
-    assigns?: any;
-    returns?: any;
     declarations?: any;
     parentContext?: any;
     retType?: any; // If in function scope
@@ -33,8 +30,6 @@ export class SemanticAnalyzer {
     private complexTypeDeclarations: any;
     private functionDeclarations: any;
     private declarations: any;
-    private assigns: any;
-    private conditions: any;
     private parser: Parser;
 
     constructor(input: string){
@@ -97,7 +92,6 @@ export class SemanticAnalyzer {
         this.statements = this.parser.parseProgram();
         this.complexTypeDeclarations = exportComplexTypeDeclarations();
         this.functionDeclarations = exportFuncDeclarations();
-        this.assigns = [];
         this.declarations = [];
         for (const s of this.statements) {
             this.analyze(s, null);
@@ -239,9 +233,6 @@ export class SemanticAnalyzer {
         // Descend into true branch body
         const trueScope = {
             declarations: [],
-            returns: [],
-            assigns: [],
-            statements: [],
             retType: sc.retType,
             analyzer: this,
             parentContext: sc,
@@ -256,10 +247,7 @@ export class SemanticAnalyzer {
         if (st.hasFalseBlock()) {
             const falseBody = st.getFalseStmArr();
             const falseScope = {
-                assigns: [],
                 declarations: [],
-                returns: [],
-                statements: [],
                 retType: sc.retType,
                 analyzer: this,
                 parentContext: sc,
@@ -372,9 +360,6 @@ export class SemanticAnalyzer {
         // Descend into body
         const bodyScope = {
             declarations: [],
-            returns: [],
-            assigns: [],
-            statements: [],
             retType: sc.retType,
             analyzer: this,
             parentContext: sc,
@@ -431,9 +416,6 @@ export class SemanticAnalyzer {
         // Descend into function body
         const bodyScope = {
             declarations: [...params],
-            returns: [],
-            assigns: [],
-            statements: [],
             retType,
             analyzer: this,
             parentContext: null,
