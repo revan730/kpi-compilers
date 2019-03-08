@@ -53,3 +53,7 @@ while (counter < 5) {
         print(itoa(counter));
         counter = counter + 1;
 }
+
+if (true) {
+    print("true from file scope if");
+}

@@ -42,6 +42,7 @@ export class SemanticAnalyzer {
     }
 
     public analyze(s: Statement, scope: Scope) {
+
         if (s instanceof ComplexType) {
             this.checkComplexType(s, scope);
         }
@@ -226,6 +227,9 @@ export class SemanticAnalyzer {
     }
 
     public checkIf(st: IfStatement, sc: Scope) {
+        if (!sc) {
+            sc = { analyzer: this, declarations: this.declarations };
+        }
         const condType = st.getCondExp().evaluateType(sc);
         const trueBody = st.getTrueStmArr();
         if (condType !== TokenTypes.Boolean) {
@@ -318,6 +322,9 @@ export class SemanticAnalyzer {
         const funcDec = this.findFunctionDeclaration(funcId, sc);
         const funcParams = funcDec.getParams();
         const callParams = st.getParams();
+        if (!sc) {
+            sc = { analyzer: this, declarations: this.declarations };
+        }
 
         if (!funcDec) {
             throw new Error(`SH19: Trying to call func ${funcId} but it's not declared`);
@@ -330,11 +337,7 @@ export class SemanticAnalyzer {
         for (let i = 0; i < funcParams.length; i++) {
             const expectedType = funcParams[i].getType();
             let actualType = null;
-            if (sc) {
-                actualType = callParams[i].evaluateType(sc);
-            } else {
-                actualType = callParams[i].evaluateType({ analyzer: this, declarations: this.declarations});
-            }
+            actualType = callParams[i].evaluateType(sc);
             if (expectedType !== actualType) {
                 throw new Error(`SH21: Param at index ${i + 1} expected to have type ${expectedType}, got ${actualType}`);
             }
@@ -342,6 +345,9 @@ export class SemanticAnalyzer {
     }
 
     public checkWhile(st: WhileStatement, sc: Scope) {
+        if (!sc) {
+            sc = { analyzer: this, declarations: this.declarations };
+        }
         const condType = st.getCondExp().evaluateType(sc);
         const body = st.getLoopStm();
         if (condType !== TokenTypes.Boolean) {
