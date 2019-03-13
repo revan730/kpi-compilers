@@ -23,6 +23,7 @@ var integer myInt;
 var complex myType myTypeVar;
 var user Revan730;
 Revan730 = {
+    username = "revan730";
     hookSecret = "secret";
     accessToken = "token";
 }
@@ -60,11 +61,26 @@ if (true) {
 
 var repo ClipperFront;
 ClipperFront = {
+    fullName = "clipper-front";
     owner = Revan730;
-    url = "httpsgithub.com/revan730/clipper-front";
+    url = "https://github.com/revan730/clipper-front";
     branch = "dev";
 }
 
 var boolean validRepo;
 validRepo = validateRepo(ClipperFront);
 print(strConcat("Repo valid: ", btoa(validRepo)));
+
+var ciConfig validConfig;
+validConfig = {
+    gcr = "eu.gcr.io/mygcrrepoprefix";
+}
+
+print(createCIData(ClipperFront, validConfig));
+
+var manifest ClipperManifest;
+ClipperManifest = {
+    image = "eu.gcr.io/mygcrrepoprefix/clipper-front:latest";
+    replicas = 2;
+    k8sName = "clipper";
+}

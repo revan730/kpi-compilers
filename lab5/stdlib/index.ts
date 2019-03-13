@@ -8,11 +8,27 @@ import { UserDec } from "./user";
 import { RepoDec } from "./repo";
 import { BtoaDec } from "./btoa";
 import { StrConcatDec } from "./strConcat";
+import { CIConfigDec } from "./ciConfig";
+import { CreateCIDataDec } from "./createCIData";
+import { ManifestDec } from "./manifest";
 
 export function exportFuncDeclarations(): Func[] {
-    return [PrintDec, ItoaDec, ValidateRepoDec, ValidateUrlDec, BtoaDec, StrConcatDec];
+    return [
+        PrintDec,
+        ItoaDec,
+        ValidateRepoDec,
+        ValidateUrlDec,
+        BtoaDec,
+        StrConcatDec,
+        CreateCIDataDec,
+    ];
 }
 
 export function exportComplexTypeDeclarations(): ComplexType[] {
-    return [UserDec, RepoDec];
+    return [
+        UserDec,
+        RepoDec,
+        CIConfigDec,
+        ManifestDec,
+        ];
 }

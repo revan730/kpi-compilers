@@ -360,7 +360,7 @@ export class SemanticAnalyzer {
             }
         }
         if (!atLeastOneIdUsed) {
-            console.log(`SH13: Possible endless while loop`);
+            throw new Error(`SH13: Possible endless while loop`);
         }
 
         // Descend into body
