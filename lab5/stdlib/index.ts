@@ -11,6 +11,8 @@ import { StrConcatDec } from "./strConcat";
 import { CIConfigDec } from "./ciConfig";
 import { CreateCIDataDec } from "./createCIData";
 import { ManifestDec } from "./manifest";
+import { RenderManifestYamlDec } from "./renderManifestYaml";
+import { ValidateManifestDec } from "./validateManifest";
 
 export function exportFuncDeclarations(): Func[] {
     return [
@@ -21,6 +23,8 @@ export function exportFuncDeclarations(): Func[] {
         BtoaDec,
         StrConcatDec,
         CreateCIDataDec,
+        RenderManifestYamlDec,
+        ValidateManifestDec,
     ];
 }
 

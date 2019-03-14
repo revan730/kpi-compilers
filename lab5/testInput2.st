@@ -84,3 +84,8 @@ ClipperManifest = {
     replicas = 2;
     k8sName = "clipper";
 }
+if (validateManifest(ClipperManifest) == true) {
+    print(renderManifestYaml(ClipperManifest));
+} else {
+    print("Invalid manifest");
+}

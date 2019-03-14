@@ -168,7 +168,7 @@ export class Interpreter {
         let returnValue = null;
         for (const st of f.getBody().getStatementsList()) {
             const val = this.interpret(st, bodyScope);
-            if (typeof val !== 'undefined') {
+            if (typeof val !== "undefined") {
                 returnValue = val;
                 return returnValue;
             }
@@ -203,7 +203,7 @@ export class Interpreter {
         } else {
             if (i.hasFalseBlock()) {
                 // go into false block
-                for (const st of i.getTrueStmArr()) {
+                for (const st of i.getFalseStmArr()) {
                     const val = this.interpret(st, ifScope);
                     if (val) {
                         returnValue = val;
