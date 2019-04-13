@@ -1,0 +1,24 @@
+retType: boolean typeof string
+funcType: boolean true
+ReturnStatement { value: BooleanLiteral { getValue: [Function], value: true } }
+retType: Func {
+  id: 'nestedFunc',
+  params: [],
+  body: BlockStatement { statementList: [ [ReturnStatement] ] },
+  returnType: 'boolean' } typeof object
+funcType: boolean false
+ReturnStatement {
+  value:
+   FuncCallExpression {
+     getId: [Function],
+     getParams: [Function],
+     id: 'nestedFunc',
+     params: [] } }
+Error: SH08: Type [object Object] doesn't match with boolean 
+    at SemanticAnalyzer.checkReturn (/home/revan730/univer/kpi-compilers/lab4/semantic.ts:132:19)
+    at SemanticAnalyzer.analyze (/home/revan730/univer/kpi-compilers/lab4/semantic.ts:44:18)
+    at SemanticAnalyzer.checkFunction (/home/revan730/univer/kpi-compilers/lab4/semantic.ts:188:18)
+    at SemanticAnalyzer.analyze (/home/revan730/univer/kpi-compilers/lab4/semantic.ts:40:18)
+    at SemanticAnalyzer.analyzeFile (/home/revan730/univer/kpi-compilers/lab4/semantic.ts:54:18)
+    at /home/revan730/univer/kpi-compilers/lab4/testSemantic.ts:7:11
+    at FSReqCallback.readFileAfterClose [as oncomplete] (internal/fs/read_file_context.js:54:3)

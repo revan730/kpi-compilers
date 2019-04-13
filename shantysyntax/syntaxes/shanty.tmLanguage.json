@@ -1,0 +1,102 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Shanty",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#runes"
+		},
+		{
+			"include": "#varDeclarations"
+		},
+		{
+			"include": "#funcDeclarations"
+		},
+		{
+			"include": "#types"
+		},
+		{
+			"include": "#literals"
+		},
+		{
+			"include": "#operators"
+		},
+		{
+			"include": "#identifiers"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.shanty",
+				"match": "\\b(if|while|for|return|complex|void)\\b"
+			}]
+		},
+		"literals": {
+			"patterns": [{
+				"name": "constant.numeric.shanty",
+				"match": "\\b[0-9]+"
+			}, {
+				"name": "constant.language.shanty",
+				"match": "\\b(true|false)\\b"
+			}]
+		},
+		"types": {
+			"patterns": [{
+				"name": "support.type.shanty",
+				"match": "\\b(string|integer|rune|boolean|complex|user|repo|ciConfig|manifest|deployment)\\b"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.shanty",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.shanty",
+					"match": "\\\\."
+				}
+			]
+		},
+		"operators": {
+			"patterns": [{
+				"name": "keyword.operator.assignment.shanty",
+				"match": "="
+			},
+			{
+				"name": "keyword.operator.plus.shanty",
+				"match": "\\+"
+			}]
+		},
+		"identifiers": {
+			"patterns": [{
+				"name": "variable.other.var.shanty",
+				"match": "\\b[a-zA-Z0-9]+"
+			}]
+		},
+		"runes": {
+			"name": "string.quoted.single.shanty",
+			"begin": "'",
+			"end": "'",
+			"patterns": []
+		},
+		"varDeclarations": {
+			"patterns": [{
+				"name": "storage.type.shanty",
+				"match": "\\b(var)\\b"
+			}]
+		},
+		"funcDeclarations": {
+			"patterns": [{
+				"name": "storage.type.shanty",
+				"match": "\\b(func|command)\\b"
+			}]
+		}
+	},
+	"scopeName": "source.shanty"
+}

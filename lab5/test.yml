@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "golang-hello"
+spec:
+  selector:
+    matchLabels:
+      app: "golang-hello"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "golang-hello"
+    spec:
+      containers:
+      - name: "golang-hello"
+        image: "qorbani/golang-hello-world:latest"
+        ports:
+        - containerPort: 8082

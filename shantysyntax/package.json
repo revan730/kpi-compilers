@@ -1,0 +1,25 @@
+{
+    "name": "shantysyntax",
+    "displayName": "shantySyntax",
+    "description": "Shanty language syntax highlighter",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.32.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "shanty",
+            "aliases": ["Shanty", "shanty"],
+            "extensions": ["st"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "shanty",
+            "scopeName": "source.shanty",
+            "path": "./syntaxes/shanty.tmLanguage.json"
+        }]
+    }
+}
